@@ -166,42 +166,11 @@ class LocalDatabase {
 
     // Seed initial mock data
     const defaultData = {
-      suppliers: [
-        { id: 1, name: 'Tổng Kho Nguyên Liệu Cát Tường', phone: '0901234567', email: 'cattuong@gmail.com', address: '120 Lý Thường Kiệt, Q.10, TP.HCM', notes: 'Cung cấp trà và siro' },
-        { id: 2, name: 'Vinamilk Việt Nam', phone: '0283820220', email: 'contact@vinamilk.com', address: '10 Tân Trào, Q.7, TP.HCM', notes: 'Sữa tươi, sữa đặc' },
-        { id: 3, name: 'Bao Bì Xanh', phone: '0933445566', email: 'pack@baobixanh.com', address: '45 Lê Lợi, Gò Vấp, TP.HCM', notes: 'Ly, túi bóng, ống hút' }
-      ],
-      ingredients: [
-        { id: 1, name: 'Trà Đen Lộc Phát (Gói 1kg)', unit: 'Gói', cost_price: 120000, current_stock: 42, min_stock: 10, supplier_id: 1 },
-        { id: 2, name: 'Trà Lài Lộc Phát (Gói 1kg)', unit: 'Gói', cost_price: 150000, current_stock: 28, min_stock: 8, supplier_id: 1 },
-        { id: 3, name: 'Bột sữa B-one (Bao 1kg)', unit: 'Bao', cost_price: 75000, current_stock: 35, min_stock: 12, supplier_id: 1 },
-        { id: 4, name: 'Sữa đặc Ngôi Sao Phương Nam (Hộp 1.28kg)', unit: 'Hộp', cost_price: 68000, current_stock: 52, min_stock: 15, supplier_id: 2 },
-        { id: 5, name: 'Siro Đào Teisseire (Chai 700ml)', unit: 'Chai', cost_price: 210000, current_stock: 8, min_stock: 5, supplier_id: 1 },
-        { id: 6, name: 'Trân châu đen Wings (Túi 3kg)', unit: 'Túi', cost_price: 95000, current_stock: 4, min_stock: 6, supplier_id: 1 },
-        { id: 7, name: 'Ly Nhựa Phi 95 500ml (Cây 50 cái)', unit: 'Cây', cost_price: 45000, current_stock: 85, min_stock: 20, supplier_id: 3 },
-        { id: 8, name: 'Ống hút trân châu (Gói 100 cái)', unit: 'Gói', cost_price: 15000, current_stock: 75, min_stock: 15, supplier_id: 3 }
-      ],
-      products: [
-        { id: 1, item_id: 'fabi-item-1', item_name: 'Trà Sữa Trân Châu Sợi', category: 'Trà sữa', price: 45000, active: true, recipe_missing: false },
-        { id: 2, item_id: 'fabi-item-2', item_name: 'Trà Đào Cam Sả', category: 'Trà trái cây', price: 49000, active: true, recipe_missing: false },
-        { id: 3, item_id: 'fabi-item-3', item_name: 'Cà Phê Sữa Đá', category: 'Cà phê', price: 29000, active: true, recipe_missing: true }
-      ],
-      recipes: [
-        { id: 1, product_id: 1, version: 1, active: true },
-        { id: 2, product_id: 2, version: 1, active: true }
-      ],
-      recipe_items: [
-        // Trà Sữa Trân Châu Sợi
-        { id: 1, recipe_id: 1, ingredient_id: 1, quantity: 0.120 }, // 120ml cốt trà đen (0.12 gói)
-        { id: 2, recipe_id: 1, ingredient_id: 3, quantity: 0.035 }, // 35g bột sữa (0.035 bao)
-        { id: 3, recipe_id: 1, ingredient_id: 4, quantity: 0.040 }, // 40ml sữa đặc (0.04 hộp)
-        { id: 4, recipe_id: 1, ingredient_id: 6, quantity: 0.050 }, // 50g trân châu (0.05 túi)
-        { id: 5, recipe_id: 1, ingredient_id: 7, quantity: 0.020 }, // 1 ly (1/50 cây = 0.02 cây)
-        // Trà đào cam sả
-        { id: 6, recipe_id: 2, ingredient_id: 2, quantity: 0.120 }, // 120ml trà lài
-        { id: 7, recipe_id: 2, ingredient_id: 5, quantity: 0.035 }, // 35ml siro đào (0.035 chai 1l)
-        { id: 8, recipe_id: 2, ingredient_id: 7, quantity: 0.020 }  // ly nhựa
-      ],
+      suppliers: [],
+      ingredients: [],
+      products: [],
+      recipes: [],
+      recipe_items: [],
       imports: [],
       import_items: [],
       exports: [],

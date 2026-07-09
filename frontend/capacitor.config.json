@@ -1,0 +1,8 @@
+{
+  "appId": "com.ipos.inventory",
+  "appName": "iPOS Inventory",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

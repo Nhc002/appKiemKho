@@ -1,0 +1,73 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android App (APK)
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository code
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # 2. Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      # 3. Install frontend dependencies
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm install
+
+      # 4. Build the React web application
+      - name: Build Web Application
+        run: |
+          cd frontend
+          npm run build
+
+      # 5. Set up Java JDK 17 (required for Android Gradle compilation)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # 6. Set up Android SDK
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # 7. Sync Capacitor web code to Android project
+      - name: Capacitor Sync
+        run: |
+          cd frontend
+          npx cap sync android
+
+      # 8. Grant execute permission for Gradle wrapper
+      - name: Grant Execute Permission to Gradle
+        run: |
+          cd frontend/android
+          chmod +x gradlew
+
+      # 9. Build debug APK
+      - name: Compile APK (Gradle)
+        run: |
+          cd frontend/android
+          ./gradlew assembleDebug
+
+      # 10. Upload the generated APK as GitHub Action artifact
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iPOS-Inventory-Android-Debug
+          path: frontend/android/app/build/outputs/apk/debug/app-debug.apk

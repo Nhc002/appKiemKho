@@ -1,305 +1,64 @@
 {
-  "suppliers": [
-    {
-      "id": 1,
-      "name": "Tổng Kho Nguyên Liệu Cát Tường",
-      "phone": "0901234567",
-      "email": "cattuong@gmail.com",
-      "address": "120 Lý Thường Kiệt, Q.10, TP.HCM",
-      "notes": "Cung cấp trà và siro"
-    },
-    {
-      "id": 2,
-      "name": "Vinamilk Việt Nam",
-      "phone": "0283820220",
-      "email": "contact@vinamilk.com",
-      "address": "10 Tân Trào, Q.7, TP.HCM",
-      "notes": "Sữa tươi, sữa đặc"
-    },
-    {
-      "id": 3,
-      "name": "Bao Bì Xanh",
-      "phone": "0933445566",
-      "email": "pack@baobixanh.com",
-      "address": "45 Lê Lợi, Gò Vấp, TP.HCM",
-      "notes": "Ly, túi bóng, ống hút"
-    }
-  ],
-  "ingredients": [
-    {
-      "id": 1,
-      "name": "Trà Đen Lộc Phát (Gói 1kg)",
-      "unit": "Gói",
-      "cost_price": 120000,
-      "current_stock": 42,
-      "min_stock": 10,
-      "supplier_id": 1
-    },
-    {
-      "id": 2,
-      "name": "Trà Lài Lộc Phát (Gói 1kg)",
-      "unit": "Gói",
-      "cost_price": 150000,
-      "current_stock": 28,
-      "min_stock": 8,
-      "supplier_id": 1
-    },
-    {
-      "id": 3,
-      "name": "Bột sữa B-one (Bao 1kg)",
-      "unit": "Bao",
-      "cost_price": 75000,
-      "current_stock": 35,
-      "min_stock": 12,
-      "supplier_id": 1
-    },
-    {
-      "id": 4,
-      "name": "Sữa đặc Ngôi Sao Phương Nam (Hộp 1.28kg)",
-      "unit": "Hộp",
-      "cost_price": 68000,
-      "current_stock": 52,
-      "min_stock": 15,
-      "supplier_id": 2
-    },
-    {
-      "id": 5,
-      "name": "Siro Đào Teisseire (Chai 700ml)",
-      "unit": "Chai",
-      "cost_price": 210000,
-      "current_stock": 8,
-      "min_stock": 5,
-      "supplier_id": 1
-    },
-    {
-      "id": 6,
-      "name": "Trân châu đen Wings (Túi 3kg)",
-      "unit": "Túi",
-      "cost_price": 95000,
-      "current_stock": 4,
-      "min_stock": 6,
-      "supplier_id": 1
-    },
-    {
-      "id": 7,
-      "name": "Ly Nhựa Phi 95 500ml (Cây 50 cái)",
-      "unit": "Cây",
-      "cost_price": 45000,
-      "current_stock": 85,
-      "min_stock": 20,
-      "supplier_id": 3
-    },
-    {
-      "id": 8,
-      "name": "Ống hút trân châu (Gói 100 cái)",
-      "unit": "Gói",
-      "cost_price": 15000,
-      "current_stock": 75,
-      "min_stock": 15,
-      "supplier_id": 3
-    }
-  ],
+  "suppliers": [],
+  "ingredients": [],
   "products": [
     {
-      "id": 1,
       "item_id": "fabi-item-1",
       "item_name": "Trà Sữa Trân Châu Sợi",
       "category": "Trà sữa",
       "price": 45000,
       "active": true,
-      "recipe_missing": false
+      "recipe_missing": true,
+      "id": 1783609507405
     },
     {
-      "id": 2,
+      "item_id": "fabi-item-1",
+      "item_name": "Trà Sữa Trân Châu Sợi",
+      "category": "Trà sữa",
+      "price": 45000,
+      "active": true,
+      "recipe_missing": true,
+      "id": 1783609507405
+    },
+    {
       "item_id": "fabi-item-2",
       "item_name": "Trà Đào Cam Sả",
       "category": "Trà trái cây",
       "price": 49000,
       "active": true,
-      "recipe_missing": false
+      "recipe_missing": true,
+      "id": 1783609514241
     },
     {
-      "id": 3,
-      "item_id": "fabi-item-3",
-      "item_name": "Cà Phê Sữa Đá",
-      "category": "Cà phê",
-      "price": 29000,
+      "item_id": "fabi-item-2",
+      "item_name": "Trà Đào Cam Sả",
+      "category": "Trà trái cây",
+      "price": 49000,
       "active": true,
-      "recipe_missing": true
+      "recipe_missing": true,
+      "id": 1783609514241
     },
     {
-      "item_id": "fabi-item-new-14",
+      "item_id": "fabi-item-new-61",
       "item_name": "Sữa Tươi Trân Châu Đường Đen",
       "category": "Sữa tươi",
       "price": 55000,
       "active": true,
       "recipe_missing": true,
-      "id": 1783602936312
+      "id": 1783610100990
     },
     {
-      "item_id": "fabi-item-new-14",
+      "item_id": "fabi-item-new-61",
       "item_name": "Sữa Tươi Trân Châu Đường Đen",
       "category": "Sữa tươi",
       "price": 55000,
       "active": true,
       "recipe_missing": true,
-      "id": 1783602936312
-    },
-    {
-      "item_id": "fabi-item-new-47",
-      "item_name": "Sữa Tươi Trân Châu Đường Đen",
-      "category": "Sữa tươi",
-      "price": 55000,
-      "active": true,
-      "recipe_missing": true,
-      "id": 1783603836580
-    },
-    {
-      "item_id": "fabi-item-new-47",
-      "item_name": "Sữa Tươi Trân Châu Đường Đen",
-      "category": "Sữa tươi",
-      "price": 55000,
-      "active": true,
-      "recipe_missing": true,
-      "id": 1783603836580
-    },
-    {
-      "item_id": "fabi-item-new-17",
-      "item_name": "Sữa Tươi Trân Châu Đường Đen",
-      "category": "Sữa tươi",
-      "price": 55000,
-      "active": true,
-      "recipe_missing": true,
-      "id": 1783604136193
-    },
-    {
-      "item_id": "fabi-item-new-17",
-      "item_name": "Sữa Tươi Trân Châu Đường Đen",
-      "category": "Sữa tươi",
-      "price": 55000,
-      "active": true,
-      "recipe_missing": true,
-      "id": 1783604136193
-    },
-    {
-      "item_id": "fabi-item-new-108",
-      "item_name": "Sữa Tươi Trân Châu Đường Đen",
-      "category": "Sữa tươi",
-      "price": 55000,
-      "active": true,
-      "recipe_missing": true,
-      "id": 1783604736293
-    },
-    {
-      "item_id": "fabi-item-new-108",
-      "item_name": "Sữa Tươi Trân Châu Đường Đen",
-      "category": "Sữa tươi",
-      "price": 55000,
-      "active": true,
-      "recipe_missing": true,
-      "id": 1783604736293
-    },
-    {
-      "item_id": "fabi-item-new-15",
-      "item_name": "Sữa Tươi Trân Châu Đường Đen",
-      "category": "Sữa tươi",
-      "price": 55000,
-      "active": true,
-      "recipe_missing": true,
-      "id": 1783605036948
-    },
-    {
-      "item_id": "fabi-item-new-15",
-      "item_name": "Sữa Tươi Trân Châu Đường Đen",
-      "category": "Sữa tươi",
-      "price": 55000,
-      "active": true,
-      "recipe_missing": true,
-      "id": 1783605036948
-    },
-    {
-      "item_id": "fabi-item-new-26",
-      "item_name": "Sữa Tươi Trân Châu Đường Đen",
-      "category": "Sữa tươi",
-      "price": 55000,
-      "active": true,
-      "recipe_missing": true,
-      "id": 1783605336571
-    },
-    {
-      "item_id": "fabi-item-new-26",
-      "item_name": "Sữa Tươi Trân Châu Đường Đen",
-      "category": "Sữa tươi",
-      "price": 55000,
-      "active": true,
-      "recipe_missing": true,
-      "id": 1783605336571
+      "id": 1783610100990
     }
   ],
-  "recipes": [
-    {
-      "id": 1,
-      "product_id": 1,
-      "version": 1,
-      "active": true
-    },
-    {
-      "id": 2,
-      "product_id": 2,
-      "version": 1,
-      "active": true
-    }
-  ],
-  "recipe_items": [
-    {
-      "id": 1,
-      "recipe_id": 1,
-      "ingredient_id": 1,
-      "quantity": 0.12
-    },
-    {
-      "id": 2,
-      "recipe_id": 1,
-      "ingredient_id": 3,
-      "quantity": 0.035
-    },
-    {
-      "id": 3,
-      "recipe_id": 1,
-      "ingredient_id": 4,
-      "quantity": 0.04
-    },
-    {
-      "id": 4,
-      "recipe_id": 1,
-      "ingredient_id": 6,
-      "quantity": 0.05
-    },
-    {
-      "id": 5,
-      "recipe_id": 1,
-      "ingredient_id": 7,
-      "quantity": 0.02
-    },
-    {
-      "id": 6,
-      "recipe_id": 2,
-      "ingredient_id": 2,
-      "quantity": 0.12
-    },
-    {
-      "id": 7,
-      "recipe_id": 2,
-      "ingredient_id": 5,
-      "quantity": 0.035
-    },
-    {
-      "id": 8,
-      "recipe_id": 2,
-      "ingredient_id": 7,
-      "quantity": 0.02
-    }
-  ],
+  "recipes": [],
+  "recipe_items": [],
   "imports": [],
   "import_items": [],
   "exports": [],
@@ -308,376 +67,150 @@
   "count_items": [],
   "sales": [
     {
-      "id": 1783602943344,
-      "sync_date": "2026-07-09T13:15:43.344Z",
+      "id": 1783609521229,
+      "sync_date": "2026-07-09T15:05:21.229Z",
       "start_date": "2026-07-09",
       "end_date": "2026-07-09",
-      "total_revenue_net": 2102000,
-      "total_revenue_gross": 2134000,
-      "total_cogs": 957570,
-      "created_at": "2026-07-09T13:15:43.344Z"
+      "total_revenue_net": 1896000,
+      "total_revenue_gross": 1950000,
+      "total_cogs": 0,
+      "created_at": "2026-07-09T15:05:21.229Z"
     },
     {
-      "id": 1783603843044,
-      "sync_date": "2026-07-09T13:30:43.044Z",
+      "id": 1783609800911,
+      "sync_date": "2026-07-09T15:10:00.911Z",
       "start_date": "2026-07-09",
       "end_date": "2026-07-09",
-      "total_revenue_net": 2225000,
-      "total_revenue_gross": 2261000,
-      "total_cogs": 1087110,
-      "created_at": "2026-07-09T13:30:43.044Z"
+      "total_revenue_net": 1939000,
+      "total_revenue_gross": 1995000,
+      "total_cogs": 0,
+      "created_at": "2026-07-09T15:10:00.911Z"
     },
     {
-      "id": 1783604143199,
-      "sync_date": "2026-07-09T13:35:43.199Z",
+      "id": 1783610100464,
+      "sync_date": "2026-07-09T15:15:00.464Z",
       "start_date": "2026-07-09",
       "end_date": "2026-07-09",
-      "total_revenue_net": 2365000,
-      "total_revenue_gross": 2405000,
-      "total_cogs": 901650,
-      "created_at": "2026-07-09T13:35:43.199Z"
-    },
-    {
-      "id": 1783604436146,
-      "sync_date": "2026-07-09T13:40:36.146Z",
-      "start_date": "2026-07-09",
-      "end_date": "2026-07-09",
-      "total_revenue_net": 1626000,
-      "total_revenue_gross": 1672000,
-      "total_cogs": 925335,
-      "created_at": "2026-07-09T13:40:36.146Z"
-    },
-    {
-      "id": 1783604742913,
-      "sync_date": "2026-07-09T13:45:42.913Z",
-      "start_date": "2026-07-09",
-      "end_date": "2026-07-09",
-      "total_revenue_net": 3028000,
-      "total_revenue_gross": 3086000,
-      "total_cogs": 1366455,
-      "created_at": "2026-07-09T13:45:42.913Z"
-    },
-    {
-      "id": 1783605043351,
-      "sync_date": "2026-07-09T13:50:43.351Z",
-      "start_date": "2026-07-09",
-      "end_date": "2026-07-09",
-      "total_revenue_net": 1777000,
-      "total_revenue_gross": 1807000,
-      "total_cogs": 722175,
-      "created_at": "2026-07-09T13:50:43.351Z"
-    },
-    {
-      "id": 1783605343128,
-      "sync_date": "2026-07-09T13:55:43.128Z",
-      "start_date": "2026-07-09",
-      "end_date": "2026-07-09",
-      "total_revenue_net": 2549000,
-      "total_revenue_gross": 2591000,
-      "total_cogs": 1032045,
-      "created_at": "2026-07-09T13:55:43.128Z"
+      "total_revenue_net": 2096000,
+      "total_revenue_gross": 2130000,
+      "total_cogs": 0,
+      "created_at": "2026-07-09T15:15:00.464Z"
     }
   ],
   "sale_items": [
     {
-      "id": 1783602943345,
-      "sale_id": 1783602943344,
-      "product_id": 1,
-      "quantity_sold": 16,
-      "revenue_net": 688000,
-      "revenue_gross": 720000,
-      "discount_amount": 32000,
-      "cogs": 406320
-    },
-    {
-      "id": 1783602943346,
-      "sale_id": 1783602943344,
-      "product_id": 2,
-      "quantity_sold": 21,
-      "revenue_net": 1029000,
-      "revenue_gross": 1029000,
-      "discount_amount": 0,
-      "cogs": 551250
-    },
-    {
-      "id": 1783602943347,
-      "sale_id": 1783602943344,
-      "product_id": 1783602936312,
-      "quantity_sold": 7,
-      "revenue_net": 385000,
-      "revenue_gross": 385000,
-      "discount_amount": 0,
+      "id": 1783609521230,
+      "sale_id": 1783609521229,
+      "product_id": 1783609507405,
+      "quantity_sold": 27,
+      "revenue_net": 1161000,
+      "revenue_gross": 1215000,
+      "discount_amount": 54000,
       "cogs": 0
     },
     {
-      "id": 1783603843045,
-      "sale_id": 1783603843044,
-      "product_id": 1,
-      "quantity_sold": 18,
-      "revenue_net": 774000,
-      "revenue_gross": 810000,
-      "discount_amount": 36000,
-      "cogs": 457110
-    },
-    {
-      "id": 1783603843046,
-      "sale_id": 1783603843044,
-      "product_id": 2,
-      "quantity_sold": 24,
-      "revenue_net": 1176000,
-      "revenue_gross": 1176000,
-      "discount_amount": 0,
-      "cogs": 630000
-    },
-    {
-      "id": 1783603843047,
-      "sale_id": 1783603843044,
-      "product_id": 1783603836580,
-      "quantity_sold": 5,
-      "revenue_net": 275000,
-      "revenue_gross": 275000,
-      "discount_amount": 0,
-      "cogs": 0
-    },
-    {
-      "id": 1783604143199,
-      "sale_id": 1783604143199,
-      "product_id": 1,
-      "quantity_sold": 20,
-      "revenue_net": 860000,
-      "revenue_gross": 900000,
-      "discount_amount": 40000,
-      "cogs": 507900
-    },
-    {
-      "id": 1783604143200,
-      "sale_id": 1783604143199,
-      "product_id": 2,
+      "id": 1783609521231,
+      "sale_id": 1783609521229,
+      "product_id": 1783609514241,
       "quantity_sold": 15,
       "revenue_net": 735000,
       "revenue_gross": 735000,
       "discount_amount": 0,
-      "cogs": 393750
-    },
-    {
-      "id": 1783604143201,
-      "sale_id": 1783604143199,
-      "product_id": 1783604136193,
-      "quantity_sold": 14,
-      "revenue_net": 770000,
-      "revenue_gross": 770000,
-      "discount_amount": 0,
       "cogs": 0
     },
     {
-      "id": 1783604436146,
-      "sale_id": 1783604436146,
-      "product_id": 1,
-      "quantity_sold": 23,
-      "revenue_net": 989000,
-      "revenue_gross": 1035000,
-      "discount_amount": 46000,
-      "cogs": 584085
-    },
-    {
-      "id": 1783604436147,
-      "sale_id": 1783604436146,
-      "product_id": 2,
-      "quantity_sold": 13,
-      "revenue_net": 637000,
-      "revenue_gross": 637000,
-      "discount_amount": 0,
-      "cogs": 341250
-    },
-    {
-      "id": 1783604742913,
-      "sale_id": 1783604742913,
-      "product_id": 1,
-      "quantity_sold": 29,
-      "revenue_net": 1247000,
-      "revenue_gross": 1305000,
-      "discount_amount": 58000,
-      "cogs": 736455
-    },
-    {
-      "id": 1783604742914,
-      "sale_id": 1783604742913,
-      "product_id": 2,
-      "quantity_sold": 24,
-      "revenue_net": 1176000,
-      "revenue_gross": 1176000,
-      "discount_amount": 0,
-      "cogs": 630000
-    },
-    {
-      "id": 1783604742915,
-      "sale_id": 1783604742913,
-      "product_id": 1783604736293,
-      "quantity_sold": 11,
-      "revenue_net": 605000,
-      "revenue_gross": 605000,
-      "discount_amount": 0,
+      "id": 1783609800911,
+      "sale_id": 1783609800911,
+      "product_id": 1783609507405,
+      "quantity_sold": 28,
+      "revenue_net": 1204000,
+      "revenue_gross": 1260000,
+      "discount_amount": 56000,
       "cogs": 0
     },
     {
-      "id": 1783605043351,
-      "sale_id": 1783605043351,
-      "product_id": 1,
+      "id": 1783609800912,
+      "sale_id": 1783609800911,
+      "product_id": 1783609514241,
       "quantity_sold": 15,
-      "revenue_net": 645000,
-      "revenue_gross": 675000,
-      "discount_amount": 30000,
-      "cogs": 380925
-    },
-    {
-      "id": 1783605043352,
-      "sale_id": 1783605043351,
-      "product_id": 2,
-      "quantity_sold": 13,
-      "revenue_net": 637000,
-      "revenue_gross": 637000,
-      "discount_amount": 0,
-      "cogs": 341250
-    },
-    {
-      "id": 1783605043353,
-      "sale_id": 1783605043351,
-      "product_id": 1783605036948,
-      "quantity_sold": 9,
-      "revenue_net": 495000,
-      "revenue_gross": 495000,
+      "revenue_net": 735000,
+      "revenue_gross": 735000,
       "discount_amount": 0,
       "cogs": 0
     },
     {
-      "id": 1783605343128,
-      "sale_id": 1783605343128,
-      "product_id": 1,
-      "quantity_sold": 21,
-      "revenue_net": 903000,
-      "revenue_gross": 945000,
-      "discount_amount": 42000,
-      "cogs": 533295
+      "id": 1783610100464,
+      "sale_id": 1783610100464,
+      "product_id": 1783609507405,
+      "quantity_sold": 17,
+      "revenue_net": 731000,
+      "revenue_gross": 765000,
+      "discount_amount": 34000,
+      "cogs": 0
     },
     {
-      "id": 1783605343129,
-      "sale_id": 1783605343128,
-      "product_id": 2,
-      "quantity_sold": 19,
-      "revenue_net": 931000,
-      "revenue_gross": 931000,
+      "id": 1783610100465,
+      "sale_id": 1783610100464,
+      "product_id": 1783609514241,
+      "quantity_sold": 20,
+      "revenue_net": 980000,
+      "revenue_gross": 980000,
       "discount_amount": 0,
-      "cogs": 498750
+      "cogs": 0
     },
     {
-      "id": 1783605343130,
-      "sale_id": 1783605343128,
-      "product_id": 1783605336571,
-      "quantity_sold": 13,
-      "revenue_net": 715000,
-      "revenue_gross": 715000,
+      "id": 1783610100466,
+      "sale_id": 1783610100464,
+      "product_id": 1783610100990,
+      "quantity_sold": 7,
+      "revenue_net": 385000,
+      "revenue_gross": 385000,
       "discount_amount": 0,
       "cogs": 0
     }
   ],
   "logs": [
     {
-      "id": 1783605343163,
-      "timestamp": "2026-07-09T13:55:43.131Z",
+      "id": 1783610100465,
+      "timestamp": "2026-07-09T15:15:00.465Z",
       "user_name": "Hệ thống",
       "action": "Đồng bộ doanh số",
-      "details": "Đồng bộ thành công dữ liệu bán hàng iPOS (2026-07-09 -> 2026-07-09). Doanh thu Net: 2.549.000₫, Giá vốn COGS: 1.032.045₫. Trừ nguyên liệu kho thành công."
+      "details": "Đồng bộ thành công dữ liệu bán hàng iPOS (2026-07-09 -> 2026-07-09). Doanh thu Net: 2.096.000₫, Giá vốn COGS: 0₫. Trừ nguyên liệu kho thành công."
     },
     {
-      "id": 1783605336013,
-      "timestamp": "2026-07-09T13:55:35.968Z",
+      "id": 1783610100463,
+      "timestamp": "2026-07-09T15:15:00.463Z",
       "user_name": "Hệ thống",
       "action": "Đồng bộ Fabi",
-      "details": "Phát hiện món mới từ iPOS: Sữa Tươi Trân Châu Đường Đen (fabi-item-new-26). Đã tạo sản phẩm và đánh dấu 'Recipe Missing' để cấu hình định lượng sau."
+      "details": "Phát hiện món mới từ iPOS: Sữa Tươi Trân Châu Đường Đen (fabi-item-new-61). Đã tạo sản phẩm và đánh dấu 'Recipe Missing' để cấu hình định lượng sau."
     },
     {
-      "id": 1783605043358,
-      "timestamp": "2026-07-09T13:50:43.354Z",
+      "id": 1783609800926,
+      "timestamp": "2026-07-09T15:10:00.926Z",
       "user_name": "Hệ thống",
       "action": "Đồng bộ doanh số",
-      "details": "Đồng bộ thành công dữ liệu bán hàng iPOS (2026-07-09 -> 2026-07-09). Doanh thu Net: 1.777.000₫, Giá vốn COGS: 722.175₫. Trừ nguyên liệu kho thành công."
+      "details": "Đồng bộ thành công dữ liệu bán hàng iPOS (2026-07-09 -> 2026-07-09). Doanh thu Net: 1.939.000₫, Giá vốn COGS: 0₫. Trừ nguyên liệu kho thành công."
     },
     {
-      "id": 1783605036286,
-      "timestamp": "2026-07-09T13:50:36.284Z",
+      "id": 1783609521259,
+      "timestamp": "2026-07-09T15:05:21.252Z",
+      "user_name": "Hệ thống",
+      "action": "Đồng bộ doanh số",
+      "details": "Đồng bộ thành công dữ liệu bán hàng iPOS (2026-07-09 -> 2026-07-09). Doanh thu Net: 1.896.000₫, Giá vốn COGS: 0₫. Trừ nguyên liệu kho thành công."
+    },
+    {
+      "id": 1783609514173,
+      "timestamp": "2026-07-09T15:05:14.169Z",
       "user_name": "Hệ thống",
       "action": "Đồng bộ Fabi",
-      "details": "Phát hiện món mới từ iPOS: Sữa Tươi Trân Châu Đường Đen (fabi-item-new-15). Đã tạo sản phẩm và đánh dấu 'Recipe Missing' để cấu hình định lượng sau."
+      "details": "Phát hiện món mới từ iPOS: Trà Đào Cam Sả (fabi-item-2). Đã tạo sản phẩm và đánh dấu 'Recipe Missing' để cấu hình định lượng sau."
     },
     {
-      "id": 1783604742921,
-      "timestamp": "2026-07-09T13:45:42.916Z",
-      "user_name": "Hệ thống",
-      "action": "Đồng bộ doanh số",
-      "details": "Đồng bộ thành công dữ liệu bán hàng iPOS (2026-07-09 -> 2026-07-09). Doanh thu Net: 3.028.000₫, Giá vốn COGS: 1.366.455₫. Trừ nguyên liệu kho thành công."
-    },
-    {
-      "id": 1783604735827,
-      "timestamp": "2026-07-09T13:45:35.826Z",
+      "id": 1783609507120,
+      "timestamp": "2026-07-09T15:05:07.117Z",
       "user_name": "Hệ thống",
       "action": "Đồng bộ Fabi",
-      "details": "Phát hiện món mới từ iPOS: Sữa Tươi Trân Châu Đường Đen (fabi-item-new-108). Đã tạo sản phẩm và đánh dấu 'Recipe Missing' để cấu hình định lượng sau."
-    },
-    {
-      "id": 1783604436180,
-      "timestamp": "2026-07-09T13:40:36.150Z",
-      "user_name": "Hệ thống",
-      "action": "Đồng bộ doanh số",
-      "details": "Đồng bộ thành công dữ liệu bán hàng iPOS (2026-07-09 -> 2026-07-09). Doanh thu Net: 1.626.000₫, Giá vốn COGS: 925.335₫. Trừ nguyên liệu kho thành công."
-    },
-    {
-      "id": 1783604143214,
-      "timestamp": "2026-07-09T13:35:43.203Z",
-      "user_name": "Hệ thống",
-      "action": "Đồng bộ doanh số",
-      "details": "Đồng bộ thành công dữ liệu bán hàng iPOS (2026-07-09 -> 2026-07-09). Doanh thu Net: 2.365.000₫, Giá vốn COGS: 901.650₫. Trừ nguyên liệu kho thành công."
-    },
-    {
-      "id": 1783604136109,
-      "timestamp": "2026-07-09T13:35:36.091Z",
-      "user_name": "Hệ thống",
-      "action": "Đồng bộ Fabi",
-      "details": "Phát hiện món mới từ iPOS: Sữa Tươi Trân Châu Đường Đen (fabi-item-new-17). Đã tạo sản phẩm và đánh dấu 'Recipe Missing' để cấu hình định lượng sau."
-    },
-    {
-      "id": 1783603843123,
-      "timestamp": "2026-07-09T13:30:43.092Z",
-      "user_name": "Hệ thống",
-      "action": "Đồng bộ doanh số",
-      "details": "Đồng bộ thành công dữ liệu bán hàng iPOS (2026-07-09 -> 2026-07-09). Doanh thu Net: 2.225.000₫, Giá vốn COGS: 1.087.110₫. Trừ nguyên liệu kho thành công."
-    },
-    {
-      "id": 1783603835936,
-      "timestamp": "2026-07-09T13:30:35.932Z",
-      "user_name": "Hệ thống",
-      "action": "Đồng bộ Fabi",
-      "details": "Phát hiện món mới từ iPOS: Sữa Tươi Trân Châu Đường Đen (fabi-item-new-47). Đã tạo sản phẩm và đánh dấu 'Recipe Missing' để cấu hình định lượng sau."
-    },
-    {
-      "id": 1783602943393,
-      "timestamp": "2026-07-09T13:15:43.363Z",
-      "user_name": "Hệ thống",
-      "action": "Đồng bộ doanh số",
-      "details": "Đồng bộ thành công dữ liệu bán hàng iPOS (2026-07-09 -> 2026-07-09). Doanh thu Net: 2.102.000₫, Giá vốn COGS: 957.570₫. Trừ nguyên liệu kho thành công."
-    },
-    {
-      "id": 1783602936286,
-      "timestamp": "2026-07-09T13:15:36.283Z",
-      "user_name": "Hệ thống",
-      "action": "Đồng bộ Fabi",
-      "details": "Phát hiện món mới từ iPOS: Sữa Tươi Trân Châu Đường Đen (fabi-item-new-14). Đã tạo sản phẩm và đánh dấu 'Recipe Missing' để cấu hình định lượng sau."
-    },
-    {
-      "id": 1,
-      "timestamp": "2026-07-09T13:15:07.992Z",
-      "user_name": "Hệ thống",
-      "action": "Khởi tạo",
-      "details": "Khởi tạo cơ sở dữ liệu dự phòng cục bộ"
+      "details": "Phát hiện món mới từ iPOS: Trà Sữa Trân Châu Sợi (fabi-item-1). Đã tạo sản phẩm và đánh dấu 'Recipe Missing' để cấu hình định lượng sau."
     }
   ]
 }
