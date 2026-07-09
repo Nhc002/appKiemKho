@@ -313,125 +313,215 @@ export default function Products() {
         
         {/* TAB 1: FABI PRODUCTS TABLE */}
         {activeSubTab === 'products' && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-xs">
-                  <th className="px-6 py-4">Món ăn / Đồ uống</th>
-                  <th className="px-6 py-4">Mã iPOS (item_id)</th>
-                  <th className="px-6 py-4">Danh mục</th>
-                  <th className="px-6 py-4 text-right">Giá bán iPOS</th>
-                  <th className="px-6 py-4 text-center">Định lượng (BOM)</th>
-                  <th className="px-6 py-4 text-center">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-semibold">
-                {prodLoading ? (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-400">Đang nạp danh sách sản phẩm...</td>
+          <>
+            {/* DESKTOP TABLE */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-xs">
+                    <th className="px-6 py-4">Món ăn / Đồ uống</th>
+                    <th className="px-6 py-4">Mã iPOS (item_id)</th>
+                    <th className="px-6 py-4">Danh mục</th>
+                    <th className="px-6 py-4 text-right">Giá bán iPOS</th>
+                    <th className="px-6 py-4 text-center">Định lượng (BOM)</th>
+                    <th className="px-6 py-4 text-center">Thao tác</th>
                   </tr>
-                ) : filteredProducts.map(p => (
-                  <tr key={p.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                    <td className="px-6 py-4 font-bold text-slate-850 dark:text-slate-100">{p.item_name}</td>
-                    <td className="px-6 py-4 text-slate-400 font-mono text-xs">{p.item_id}</td>
-                    <td className="px-6 py-4">
-                      <span className="px-2.5 py-1 bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs">
-                        {p.category || 'Món khác'}
+                </thead>
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-semibold">
+                  {prodLoading ? (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-slate-400">Đang nạp danh sách sản phẩm...</td>
+                    </tr>
+                  ) : filteredProducts.map(p => (
+                    <tr key={p.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                      <td className="px-6 py-4 font-bold text-slate-850 dark:text-slate-100">{p.item_name}</td>
+                      <td className="px-6 py-4 text-slate-400 font-mono text-xs">{p.item_id}</td>
+                      <td className="px-6 py-4">
+                        <span className="px-2.5 py-1 bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs">
+                          {p.category || 'Món khác'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right text-slate-700 dark:text-slate-350">{(p.price || 0).toLocaleString('vi-VN')}₫</td>
+                      <td className="px-6 py-4 text-center">
+                        {p.recipe_missing ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded-lg text-xs">
+                            <AlertCircle size={12} /> Thiếu BOM
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-xs">
+                            <CheckCircle size={12} /> Đã có BOM
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <button 
+                          onClick={() => navigate('/recipes', { state: { selectProductId: p.id } })}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-emerald-600 hover:text-white dark:bg-slate-800 rounded-lg text-xs transition-all"
+                        >
+                          <span>Định lượng</span> <ArrowRight size={12} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredProducts.length === 0 && !prodLoading && (
+                    <tr>
+                      <td colSpan={6} className="py-12 text-center text-slate-400">Không tìm thấy sản phẩm nào khớp với bộ lọc.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* MOBILE LIST */}
+            <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+              {prodLoading ? (
+                <p className="text-center text-slate-400 py-6 text-xs">Đang tải sản phẩm...</p>
+              ) : filteredProducts.map(p => (
+                <div key={p.id} className="p-4 space-y-2 text-xs">
+                  <div className="flex justify-between items-start">
+                    <span className="font-bold text-sm text-slate-850 dark:text-slate-100">{p.item_name}</span>
+                    <span className="px-2.5 py-0.5 bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] font-bold">
+                      {p.category || 'Món khác'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>Mã iPOS: <span className="font-mono">{p.item_id}</span></span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300">{(p.price || 0).toLocaleString('vi-VN')}₫</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2">
+                    {p.recipe_missing ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded-lg text-[10px] font-bold">
+                        <AlertCircle size={10} /> Thiếu BOM
                       </span>
-                    </td>
-                    <td className="px-6 py-4 text-right text-slate-700 dark:text-slate-300">{(p.price || 0).toLocaleString('vi-VN')}₫</td>
-                    <td className="px-6 py-4 text-center">
-                      {p.recipe_missing ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded-lg text-xs">
-                          <AlertCircle size={12} /> Thiếu BOM
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-xs">
-                          <CheckCircle size={12} /> Đã có BOM
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <button 
-                        onClick={() => navigate('/recipes', { state: { selectProductId: p.id } })}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-emerald-600 hover:text-white dark:bg-slate-800 rounded-lg text-xs transition-all"
-                      >
-                        <span>Định lượng</span> <ArrowRight size={12} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {filteredProducts.length === 0 && !prodLoading && (
-                  <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-400">Không tìm thấy sản phẩm nào khớp với bộ lọc.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-bold">
+                        <CheckCircle size={10} /> Đã có BOM
+                      </span>
+                    )}
+                    <button 
+                      onClick={() => navigate('/recipes', { state: { selectProductId: p.id } })}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-bold hover:bg-emerald-600 hover:text-white transition-all"
+                    >
+                      <span>Định lượng</span> <ArrowRight size={10} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {filteredProducts.length === 0 && !prodLoading && (
+                <p className="text-center text-slate-450 py-8 text-xs">Không tìm thấy sản phẩm.</p>
+              )}
+            </div>
+          </>
         )}
 
         {/* TAB 2: INGREDIENTS TABLE */}
         {activeSubTab === 'ingredients' && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-xs">
-                  <th className="px-6 py-4">Tên nguyên liệu</th>
-                  <th className="px-6 py-4">Đơn vị tính</th>
-                  <th className="px-6 py-4 text-right">Đơn giá vốn</th>
-                  <th className="px-6 py-4 text-right">Tồn kho hiện tại</th>
-                  <th className="px-6 py-4 text-right">Tồn tối thiểu</th>
-                  <th className="px-6 py-4">Nhà cung cấp</th>
-                  <th className="px-6 py-4 text-center">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-semibold">
-                {ingLoading ? (
-                  <tr>
-                    <td colSpan={7} className="py-8 text-center text-slate-400">Đang nạp danh sách nguyên vật liệu...</td>
+          <>
+            {/* DESKTOP TABLE */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-xs">
+                    <th className="px-6 py-4">Tên nguyên liệu</th>
+                    <th className="px-6 py-4">Đơn vị tính</th>
+                    <th className="px-6 py-4 text-right">Đơn giá vốn</th>
+                    <th className="px-6 py-4 text-right">Tồn kho hiện tại</th>
+                    <th className="px-6 py-4 text-right">Tồn tối thiểu</th>
+                    <th className="px-6 py-4">Nhà cung cấp</th>
+                    <th className="px-6 py-4 text-center">Thao tác</th>
                   </tr>
-                ) : filteredIngredients.map(ing => {
-                  const isLow = ing.current_stock <= ing.min_stock;
-                  
-                  return (
-                    <tr key={ing.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                      <td className="px-6 py-4 font-bold text-slate-800 dark:text-slate-100">{ing.name}</td>
-                      <td className="px-6 py-4 text-slate-400">{ing.unit}</td>
-                      <td className="px-6 py-4 text-right text-slate-700 dark:text-slate-300">{(ing.cost_price || 0).toLocaleString('vi-VN')}₫</td>
-                      <td className={`px-6 py-4 text-right font-extrabold ${isLow ? 'text-rose-600' : 'text-slate-800 dark:text-slate-100'}`}>
-                        {ing.current_stock}
-                        {isLow && <span className="text-[9px] font-extrabold bg-rose-100 text-rose-700 dark:bg-rose-950/20 px-1.5 py-0.5 ml-1.5 rounded-full uppercase">HẾT HÀNG</span>}
-                      </td>
-                      <td className="px-6 py-4 text-right text-slate-400">{ing.min_stock}</td>
-                      <td className="px-6 py-4">{suppliers.find(s => s.id === ing.supplier_id)?.name || 'Lẻ'}</td>
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex justify-center gap-2">
-                          <button 
-                            onClick={() => handleOpenIngModal(ing)}
-                            className="p-1.5 bg-slate-100 hover:bg-blue-600 hover:text-white dark:bg-slate-800 rounded-lg text-slate-650 transition-colors"
-                          >
-                            <Edit size={13} />
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteIngredient(ing.id)}
-                            className="p-1.5 bg-rose-50 hover:bg-rose-600 hover:text-white dark:bg-rose-950/20 text-rose-600 rounded-lg transition-colors"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </td>
+                </thead>
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-semibold">
+                  {ingLoading ? (
+                    <tr>
+                      <td colSpan={7} className="py-8 text-center text-slate-400">Đang nạp danh sách nguyên vật liệu...</td>
                     </tr>
-                  );
-                })}
-                {filteredIngredients.length === 0 && !ingLoading && (
-                  <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400">Không tìm thấy nguyên vật liệu nào khớp.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ) : filteredIngredients.map(ing => {
+                    const isLow = ing.current_stock <= ing.min_stock;
+                    
+                    return (
+                      <tr key={ing.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                        <td className="px-6 py-4 font-bold text-slate-800 dark:text-slate-100">{ing.name}</td>
+                        <td className="px-6 py-4 text-slate-400">{ing.unit}</td>
+                        <td className="px-6 py-4 text-right text-slate-700 dark:text-slate-350">{(ing.cost_price || 0).toLocaleString('vi-VN')}₫</td>
+                        <td className={`px-6 py-4 text-right font-extrabold ${isLow ? 'text-rose-600' : 'text-slate-800 dark:text-slate-100'}`}>
+                          {ing.current_stock}
+                          {isLow && <span className="text-[9px] font-extrabold bg-rose-100 text-rose-700 dark:bg-rose-950/20 px-1.5 py-0.5 ml-1.5 rounded-full uppercase">HẾT HÀNG</span>}
+                        </td>
+                        <td className="px-6 py-4 text-right text-slate-400">{ing.min_stock}</td>
+                        <td className="px-6 py-4">{suppliers.find(s => s.id === ing.supplier_id)?.name || 'Lẻ'}</td>
+                        <td className="px-6 py-4 text-center">
+                          <div className="flex justify-center gap-2">
+                            <button 
+                              onClick={() => handleOpenIngModal(ing)}
+                              className="p-1.5 bg-slate-100 hover:bg-blue-600 hover:text-white dark:bg-slate-800 rounded-lg text-slate-650 transition-colors"
+                            >
+                              <Edit size={13} />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteIngredient(ing.id)}
+                              className="p-1.5 bg-rose-50 hover:bg-rose-600 hover:text-white dark:bg-rose-950/20 text-rose-600 rounded-lg transition-colors"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {filteredIngredients.length === 0 && !ingLoading && (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center text-slate-400">Không tìm thấy nguyên vật liệu nào khớp.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* MOBILE LIST */}
+            <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+              {ingLoading ? (
+                <p className="text-center text-slate-400 py-6 text-xs">Đang tải nguyên liệu...</p>
+              ) : filteredIngredients.map(ing => {
+                const isLow = ing.current_stock <= ing.min_stock;
+                return (
+                  <div key={ing.id} className="p-4 space-y-2 text-xs">
+                    <div className="flex justify-between items-start">
+                      <span className="font-bold text-sm text-slate-800 dark:text-slate-100">{ing.name}</span>
+                      <span className="text-slate-400">DVT: {ing.unit}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-slate-400">
+                      <span>Đơn giá: <span className="font-bold text-slate-700 dark:text-slate-300">{(ing.cost_price || 0).toLocaleString('vi-VN')}₫</span></span>
+                      <span>Nhà CC: <span className="font-bold text-slate-650">{suppliers.find(s => s.id === ing.supplier_id)?.name || 'Lẻ'}</span></span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2">
+                      <div className="flex items-center gap-2">
+                        <span>Tồn: <span className={`font-extrabold ${isLow ? 'text-rose-600' : 'text-slate-800 dark:text-slate-100'}`}>{ing.current_stock}</span></span>
+                        {isLow && <span className="text-[9px] font-extrabold bg-rose-100 text-rose-700 dark:bg-rose-950/20 px-1.5 py-0.5 rounded-full uppercase">Hết</span>}
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => handleOpenIngModal(ing)}
+                          className="p-2 bg-slate-100 hover:bg-blue-650 hover:text-white dark:bg-slate-800 rounded-lg text-slate-650 transition-colors"
+                        >
+                          <Edit size={12} />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteIngredient(ing.id)}
+                          className="p-2 bg-rose-50 hover:bg-rose-600 hover:text-white dark:bg-rose-950/20 text-rose-600 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {filteredIngredients.length === 0 && !ingLoading && (
+                <p className="text-center text-slate-450 py-8 text-xs">Không tìm thấy nguyên liệu.</p>
+              )}
+            </div>
+          </>
         )}
 
       </div>

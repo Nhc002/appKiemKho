@@ -270,7 +270,8 @@ export default function Counts() {
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
           <h3 className="font-extrabold text-sm uppercase tracking-wide text-slate-400">Danh sách kiểm kê chi tiết</h3>
           
-          <div className="overflow-x-auto">
+          {/* DESKTOP TABLE (Visible on medium screens and up) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider">
@@ -330,6 +331,71 @@ export default function Counts() {
                 })}
               </tbody>
             </table>
+          </div>
+
+          {/* MOBILE LIST (Visible only on mobile screens) */}
+          <div className="md:hidden space-y-4">
+            {ingLoading ? (
+              <p className="text-center text-slate-400 py-4 text-xs">Đang nạp dữ liệu kiểm kho...</p>
+            ) : filteredItems.map(row => {
+              let cardBorderClass = 'border-slate-150 dark:border-slate-800';
+              let diffTextClass = 'text-slate-500';
+              let diffLabel = 'Khớp';
+
+              if (row.difference < 0) {
+                cardBorderClass = 'border-rose-200 dark:border-rose-950 bg-rose-50/10 dark:bg-rose-950/5';
+                diffTextClass = 'text-rose-600 dark:text-rose-400 font-bold';
+                diffLabel = `Hao hụt: ${row.difference} ${row.unit} (-${Math.abs(row.difference_cost).toLocaleString('vi-VN')}₫)`;
+              } else if (row.difference > 0) {
+                cardBorderClass = 'border-blue-200 dark:border-blue-950 bg-blue-50/10 dark:bg-blue-950/5';
+                diffTextClass = 'text-blue-600 dark:text-blue-400 font-bold';
+                diffLabel = `Dư thừa: +${row.difference} ${row.unit} (+${row.difference_cost.toLocaleString('vi-VN')}₫)`;
+              }
+
+              return (
+                <div key={row.ingredient_id} className={`p-4 border rounded-xl space-y-3 ${cardBorderClass}`}>
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-sm text-slate-800 dark:text-slate-100">{row.name}</span>
+                    <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded text-[10px] font-bold">{row.unit}</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-2 text-[10px] text-slate-400 font-semibold border-b border-slate-100 dark:border-slate-850 pb-2">
+                    <div>
+                      <span className="block text-[9px] uppercase text-slate-450">Tồn lý thuyết</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">{row.expected}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] uppercase text-slate-450">Nhập trong ca</span>
+                      <span className="text-slate-700 dark:text-slate-350 font-bold text-xs">{row.imported}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] uppercase text-slate-450">Xuất/Tiêu hao</span>
+                      <span className="text-slate-700 dark:text-slate-350 font-bold text-xs">{row.exported}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 items-center justify-between pt-1">
+                    <div className="flex-1 max-w-[140px]">
+                      <label className="text-[9px] uppercase font-bold text-slate-450 block mb-1">Thực tế đếm</label>
+                      <input 
+                        type="number" 
+                        step="0.01"
+                        value={row.actual}
+                        onChange={(e) => handleActualChange(row.ingredient_id, e.target.value)}
+                        className="w-full px-3 py-1.5 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-lg text-xs font-bold text-center focus:outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-900"
+                      />
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[9px] uppercase font-bold text-slate-450 block mb-1">Hao hụt / Chênh lệch</span>
+                      <span className={`text-[11px] ${diffTextClass}`}>{diffLabel}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            {filteredItems.length === 0 && !ingLoading && (
+              <p className="text-center text-slate-400 py-8 text-xs">Không tìm thấy nguyên vật liệu.</p>
+            )}
           </div>
         </div>
 

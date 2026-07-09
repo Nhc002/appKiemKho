@@ -101,6 +101,23 @@ export default function App() {
     }
   }, [currentUser, location.pathname]);
 
+  const getBottomNavItems = () => {
+    if (currentUser.role === 'staff') {
+      return [
+        { name: 'Nhập kho', path: '/imports', icon: Download },
+        { name: 'Xuất kho', path: '/exports', icon: Upload },
+        { name: 'Kiểm kho', path: '/counts', icon: ClipboardCheck }
+      ];
+    } else {
+      return [
+        { name: 'Tổng quan', path: '/', icon: LayoutDashboard },
+        { name: 'Sản phẩm', path: '/products', icon: Boxes },
+        { name: 'Nhập kho', path: '/imports', icon: Download },
+        { name: 'Kiểm kho', path: '/counts', icon: ClipboardCheck }
+      ];
+    }
+  };
+
   const activeAlerts = dashData?.low_stock_alerts || [];
 
   return (
@@ -287,7 +304,7 @@ export default function App() {
         </header>
 
         {/* VIEW AREA */}
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto pb-24 md:pb-6">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/products" element={<Products />} />
@@ -300,6 +317,35 @@ export default function App() {
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>
+
+        {/* MOBILE BOTTOM NAVIGATION */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 flex justify-around items-center h-16 z-40 px-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_-4px_12px_rgba(0,0,0,0.3)]">
+          {getBottomNavItems().map((item) => {
+            const isActive = location.pathname === item.path;
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex flex-col items-center justify-center flex-1 py-1 text-[10px] font-bold transition-all duration-200 ${
+                  isActive 
+                    ? 'text-emerald-600 dark:text-emerald-400 scale-105' 
+                    : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400'
+                }`}
+              >
+                <Icon size={20} className={isActive ? 'stroke-[2.5px]' : 'stroke-[1.8px]'} />
+                <span className="mt-1">{item.name}</span>
+              </Link>
+            );
+          })}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="flex flex-col items-center justify-center flex-1 py-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 hover:text-slate-600"
+          >
+            <Menu size={20} />
+            <span className="mt-1">Thêm</span>
+          </button>
+        </nav>
       </div>
 
     </div>
