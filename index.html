@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hệ Thống Quản Lý Kho Quán Nước - Cát Tường</title>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- External JS Libraries (CDNs) -->
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- SheetJS for Excel Import/Export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- HTML5-QRcode for Camera Barcode/QR Scanning -->
+  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- APP SHELL SIDEBAR -->
+  <aside id="app-sidebar">
+    <div class="sidebar-brand">
+      <i class="fa-solid fa-mug-hot"></i>
+      <span>KHO CÁT TƯỜNG</span>
+    </div>
+    
+    <ul class="sidebar-menu">
+      <li data-tab="dashboard" class="active">
+        <a onclick="App.switchTab('dashboard')"><i class="fa-solid fa-chart-pie"></i> <span>Tổng quan</span></a>
+      </li>
+      <li data-tab="products">
+        <a onclick="App.switchTab('products')"><i class="fa-solid fa-box"></i> <span>Sản phẩm</span></a>
+      </li>
+      <li data-tab="imports">
+        <a onclick="App.switchTab('imports')"><i class="fa-solid fa-arrow-down-to-bracket"></i> <span>Nhập kho</span></a>
+      </li>
+      <li data-tab="exports">
+        <a onclick="App.switchTab('exports')"><i class="fa-solid fa-arrow-up-from-bracket"></i> <span>Xuất kho</span></a>
+      </li>
+      <li data-tab="counts">
+        <a onclick="App.switchTab('counts')"><i class="fa-solid fa-clipboard-check"></i> <span>Kiểm kho cuối ca</span></a>
+      </li>
+      <li data-tab="reports">
+        <a onclick="App.switchTab('reports')"><i class="fa-solid fa-file-invoice-dollar"></i> <span>Báo cáo</span></a>
+      </li>
+      <li data-tab="users">
+        <a onclick="App.switchTab('users')"><i class="fa-solid fa-users-gear"></i> <span>Nhân viên</span></a>
+      </li>
+      <li data-tab="settings">
+        <a onclick="App.switchTab('settings')"><i class="fa-solid fa-sliders"></i> <span>Cài đặt</span></a>
+      </li>
+    </ul>
+    
+    <div class="sidebar-footer">
+      <span>Phiên bản 1.0.0 &copy; 2026</span>
+    </div>
+  </aside>
+
+  <!-- APP SHELL MAIN CONTAINER -->
+  <main id="app-container">
+    
+    <!-- HEADER -->
+    <header id="app-header">
+      <div class="header-left">
+        <button class="menu-toggle" onclick="App.toggleSidebar()">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <span class="store-title" id="header-store-name">Đá Xay & Trà Sữa Tươi Cát Tường</span>
+      </div>
+      
+      <div class="header-right">
+        <!-- Global Search -->
+        <div class="search-wrapper">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="global-search" placeholder="Tìm sản phẩm, NCC, mã..." oninput="App.handleGlobalSearch(this.value)">
+        </div>
+        
+        <!-- Dark/Light Theme Switcher -->
+        <button class="icon-btn" onclick="App.toggleTheme()" title="Chuyển chế độ tối/sáng">
+          <i class="fa-solid fa-moon" id="theme-icon"></i>
+        </button>
+        
+        <!-- Low Stock Alerts Notification -->
+        <button class="icon-btn" id="notif-btn" onclick="App.toggleNotifDropdown()" title="Thông báo hết hàng">
+          <i class="fa-solid fa-bell"></i>
+          <span class="badge-dot" id="notif-badge" style="display:none;"></span>
+          
+          <!-- Dropdown alerts list -->
+          <div class="modal-content" id="notif-dropdown" style="display:none; position:absolute; top:50px; right:0; width:320px; max-height:400px; text-align:left; z-index:150; border-radius:var(--radius-sm); padding:16px; box-shadow:var(--shadow-lg);">
+            <h4 style="margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+              <span>Cảnh báo hết hàng</span>
+              <span class="badge badge-red" id="notif-count">0</span>
+            </h4>
+            <div id="notif-list" class="alert-list" style="overflow-y:auto; max-height:280px;">
+              <!-- Dynamic alert items -->
+            </div>
+          </div>
+        </button>
+        
+        <!-- User Session / Quick Role Switcher -->
+        <div class="user-dropdown" onclick="App.toggleRoleSwitcher()" title="Thay đổi quyền kiểm thử">
+          <div class="user-avatar" id="header-user-avatar">A</div>
+          <div class="user-info">
+            <span class="user-name" id="header-user-name">Quản Trị Viên</span>
+            <span class="user-role" id="header-user-role">ADMIN</span>
+          </div>
+          <i class="fa-solid fa-chevron-down" style="font-size:10px; color:var(--text-muted);"></i>
+          
+          <!-- Role Swapper Popover -->
+          <div id="role-switcher-popover" style="display:none; position:absolute; top:60px; right:30px; background-color:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm); box-shadow:var(--shadow-lg); width:180px; z-index:150; overflow:hidden;">
+            <div style="padding:10px; font-size:11px; font-weight:700; color:var(--text-muted); background-color:var(--bg-main); border-bottom:1px solid var(--border);">ĐỔI NHANH QUYỀN (TEST)</div>
+            <a onclick="App.changeRole('usr-1')" style="display:block; padding:10px 14px; font-size:13px; color:var(--text-main); text-decoration:none; cursor:pointer;" class="role-opt">Nguyễn Quản Trị (Admin)</a>
+            <a onclick="App.changeRole('usr-2')" style="display:block; padding:10px 14px; font-size:13px; color:var(--text-main); text-decoration:none; cursor:pointer;" class="role-opt">Trần Cửa Hàng Trưởng (Manager)</a>
+            <a onclick="App.changeRole('usr-3')" style="display:block; padding:10px 14px; font-size:13px; color:var(--text-main); text-decoration:none; cursor:pointer;" class="role-opt">Lê Nhân Viên Kho (Staff)</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT WRAPPER -->
+    <div id="app-content">
+
+      <!-- 1. DASHBOARD TAB -->
+      <section id="dashboard-section" class="content-section active">
+        <div class="section-header">
+          <div class="section-title">
+            <h1 id="dash-greeting">Chào ngày mới!</h1>
+            <p>Dưới đây là tình hình kho hàng hôm nay.</p>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-primary" onclick="App.switchTab('counts')">
+              <i class="fa-solid fa-clipboard-check"></i> Kiểm kho ngay
+            </button>
+          </div>
+        </div>
+        
+        <!-- Stats Cards Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon slate"><i class="fa-solid fa-money-bill-trend-up"></i></div>
+            <div class="stat-data">
+              <div class="stat-label">Tổng Giá Trị Tồn Kho</div>
+              <div class="stat-value" id="stat-total-value">0₫</div>
+              <div class="stat-sub neutral" id="stat-total-items">0 nguyên liệu</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green"><i class="fa-solid fa-arrow-down-long"></i></div>
+            <div class="stat-data">
+              <div class="stat-label">Nhập Kho Hôm Nay</div>
+              <div class="stat-value" id="stat-today-imports">0₫</div>
+              <div class="stat-sub positive" id="stat-today-imports-count">0 phiếu</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue"><i class="fa-solid fa-arrow-up-long"></i></div>
+            <div class="stat-data">
+              <div class="stat-label">Xuất Kho Hôm Nay</div>
+              <div class="stat-value" id="stat-today-exports">0₫</div>
+              <div class="stat-sub neutral" id="stat-today-exports-count">0 phiếu</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="stat-data">
+              <div class="stat-label">Cảnh Báo Hết Hàng</div>
+              <div class="stat-value" id="stat-low-stock">0</div>
+              <div class="stat-sub negative">Cần nhập thêm gấp</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+          <div class="stat-card">
+            <div class="stat-icon red"><i class="fa-solid fa-circle-down"></i></div>
+            <div class="stat-data">
+              <div class="stat-label">Hao Hụt / Mất Mát</div>
+              <div class="stat-value" id="stat-total-loss" style="color:var(--red);">0₫</div>
+              <div class="stat-sub negative">Chi phí kiểm kho thiếu</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue"><i class="fa-solid fa-circle-up"></i></div>
+            <div class="stat-data">
+              <div class="stat-label">Giá Trị Thừa Kho</div>
+              <div class="stat-value" id="stat-total-excess" style="color:var(--blue);">0₫</div>
+              <div class="stat-sub positive">Chi phí kiểm kho dư</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange"><i class="fa-solid fa-scale-unbalanced"></i></div>
+            <div class="stat-data">
+              <div class="stat-label">Chênh Lệch Thực Tế</div>
+              <div class="stat-value" id="stat-net-difference">0₫</div>
+              <div class="stat-sub" id="stat-net-diff-sub">Thiếu so với sổ sách</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Charts Layout -->
+        <div class="chart-grid">
+          <!-- Line Chart for stock movements -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title"><i class="fa-solid fa-chart-line"></i> Xu Hướng Nhập / Xuất Kho (7 ngày gần nhất)</div>
+            </div>
+            <div class="chart-body">
+              <canvas id="movementChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- Low Stock Checklist -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title" style="color:var(--red);"><i class="fa-solid fa-bell"></i> Sản Phẩm Sắp Hết Hàng</div>
+            </div>
+            <div class="chart-body" style="height:auto; overflow-y:auto; max-height:300px;" id="dashboard-low-stock-list">
+              <!-- Dynamic list of low stock items -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Audit log on dashboard -->
+        <div class="card-panel">
+          <div class="chart-header">
+            <div class="chart-title"><i class="fa-solid fa-clock-rotate-left"></i> Nhật Ký Hoạt Động Gần Đây</div>
+            <button class="btn btn-light btn-sm" onclick="App.switchTab('settings')">Xem tất cả</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th>Thời gian</th>
+                  <th>Nhân viên</th>
+                  <th>Hành động</th>
+                  <th>Chi tiết</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-log-tbody">
+                <!-- Dynamic log lines -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. PRODUCT MANAGEMENT TAB -->
+      <section id="products-section" class="content-section">
+        <div class="section-header">
+          <div class="section-title">
+            <h1>Quản Lý Danh Mục Sản Phẩm</h1>
+            <p>Quản lý nguyên vật liệu, giá gốc, tồn kho tối thiểu và nhà cung cấp.</p>
+          </div>
+          <div class="section-actions">
+            <!-- SheetJS integration buttons -->
+            <button class="btn btn-light" onclick="App.triggerExcelImport()"><i class="fa-solid fa-file-import"></i> Nhập Excel</button>
+            <input type="file" id="excel-file-input" style="display:none;" accept=".xlsx, .xls" onchange="App.handleExcelImport(event)">
+            
+            <button class="btn btn-light" onclick="App.exportProductsToExcel()"><i class="fa-solid fa-file-export"></i> Xuất Excel</button>
+            
+            <!-- Category and Supplier managers -->
+            <button class="btn btn-secondary" onclick="App.openCategoryModal()"><i class="fa-solid fa-tags"></i> Danh mục</button>
+            <button class="btn btn-secondary" onclick="App.openSupplierModal()"><i class="fa-solid fa-truck-field"></i> Nhà cung cấp</button>
+            
+            <button class="btn btn-primary" onclick="App.openProductModal()"><i class="fa-solid fa-plus"></i> Thêm sản phẩm</button>
+          </div>
+        </div>
+        
+        <!-- Filter bar -->
+        <div class="card-panel">
+          <div class="filter-row">
+            <div class="filter-inputs">
+              <div class="search-wrapper" style="width:240px; position:relative;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="prod-search-input" placeholder="Tìm tên hoặc mã vạch..." oninput="App.filterProducts()">
+              </div>
+              
+              <select id="prod-filter-category" class="form-select" style="width:180px;" onchange="App.filterProducts()">
+                <option value="">-- Tất cả danh mục --</option>
+              </select>
+              
+              <select id="prod-filter-supplier" class="form-select" style="width:200px;" onchange="App.filterProducts()">
+                <option value="">-- Tất cả nhà cung cấp --</option>
+              </select>
+
+              <select id="prod-filter-stock" class="form-select" style="width:160px;" onchange="App.filterProducts()">
+                <option value="">-- Mức tồn kho --</option>
+                <option value="low">Sắp hết hàng</option>
+                <option value="out">Đã hết hàng</option>
+                <option value="ok">Bình thường</option>
+              </select>
+            </div>
+            
+            <div style="font-size:13px; color:var(--text-muted); font-weight:500;">
+              Tổng cộng: <span id="prod-count-val" style="color:var(--text-main); font-weight:700;">0</span> sản phẩm
+            </div>
+          </div>
+        </div>
+        
+        <!-- Products Table -->
+        <div class="table-responsive">
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Sản phẩm</th>
+                <th>Danh mục</th>
+                <th>Đơn vị</th>
+                <th style="text-align:right;">Tồn ban đầu</th>
+                <th style="text-align:right;">Tồn hiện tại</th>
+                <th style="text-align:right;">Tồn tối thiểu</th>
+                <th style="text-align:right;">Đơn giá mua</th>
+                <th>Nhà cung cấp</th>
+                <th>Mã vạch</th>
+                <th style="text-align:center;">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="products-tbody">
+              <!-- Dynamic products -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3. STOCK IMPORT TAB -->
+      <section id="imports-section" class="content-section">
+        <div class="section-header">
+          <div class="section-title">
+            <h1>Nhập Kho Nguyên Liệu</h1>
+            <p>Tạo phiếu nhập kho để bổ sung nguyên vật liệu.</p>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-light" onclick="App.openImportHistoryModal()"><i class="fa-solid fa-history"></i> Lịch sử nhập</button>
+          </div>
+        </div>
+        
+        <div class="receipt-grid">
+          <!-- Left: Receipt detail cart builder -->
+          <div class="receipt-cart">
+            <h3 style="margin-bottom:16px; font-weight:700;">Chi tiết phiếu nhập</h3>
+            
+            <div class="table-responsive" style="margin-bottom:16px;">
+              <table class="table-custom cart-table">
+                <thead>
+                  <tr>
+                    <th>Tên sản phẩm</th>
+                    <th style="width:120px; text-align:center;">Số lượng</th>
+                    <th style="width:120px;">Đơn vị</th>
+                    <th style="width:140px; text-align:right;">Đơn giá nhập</th>
+                    <th style="width:140px; text-align:right;">Thành tiền</th>
+                    <th style="width:60px; text-align:center;">Xóa</th>
+                  </tr>
+                </thead>
+                <tbody id="import-cart-tbody">
+                  <!-- Dynamic import cart rows -->
+                </tbody>
+              </table>
+            </div>
+            
+            <button class="btn btn-light btn-sm" onclick="App.addImportCartRow()">
+              <i class="fa-solid fa-plus"></i> Thêm sản phẩm nhập
+            </button>
+          </div>
+          
+          <!-- Right: Metadata & Submit panel -->
+          <div class="receipt-summary">
+            <h3 style="font-weight:700; border-bottom:1px solid var(--border); padding-bottom:10px;">Thông tin chung</h3>
+            
+            <div class="form-group">
+              <label for="import-supplier">Nhà cung cấp *</label>
+              <select id="import-supplier" class="form-select">
+                <!-- Dynamic suppliers list -->
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="import-note">Ghi chú phiếu nhập</label>
+              <textarea id="import-note" rows="3" class="form-control" placeholder="Ví dụ: Nhập hàng bổ sung hàng tuần..."></textarea>
+            </div>
+            
+            <div class="receipt-summary-row" style="margin-top:10px;">
+              <span>Tổng số mặt hàng:</span>
+              <span id="import-total-items-qty">0</span>
+            </div>
+            
+            <div class="receipt-summary-total">
+              <span>Tổng tiền nhập:</span>
+              <span id="import-total-price">0₫</span>
+            </div>
+            
+            <button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="App.submitImport()">
+              <i class="fa-solid fa-arrow-down-to-bracket"></i> Xác nhận nhập kho
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. STOCK EXPORT TAB -->
+      <section id="exports-section" class="content-section">
+        <div class="section-header">
+          <div class="section-title">
+            <h1>Xuất Kho Vật Tư</h1>
+            <p>Hao hụt pha chế, bán hàng, hủy hỏng hoặc tiêu dùng nội bộ.</p>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-light" onclick="App.openExportHistoryModal()"><i class="fa-solid fa-history"></i> Lịch sử xuất</button>
+          </div>
+        </div>
+        
+        <div class="receipt-grid">
+          <!-- Left: Receipt detail cart builder -->
+          <div class="receipt-cart">
+            <h3 style="margin-bottom:16px; font-weight:700;">Chi tiết sản phẩm xuất</h3>
+            
+            <div class="table-responsive" style="margin-bottom:16px;">
+              <table class="table-custom cart-table">
+                <thead>
+                  <tr>
+                    <th>Tên sản phẩm</th>
+                    <th style="width:100px; text-align:center;">Số lượng</th>
+                    <th style="width:100px;">Đơn vị</th>
+                    <th>Lý do xuất</th>
+                    <th style="width:120px; text-align:right;">Đơn giá vốn</th>
+                    <th style="width:120px; text-align:right;">Thành tiền</th>
+                    <th style="width:60px; text-align:center;">Xóa</th>
+                  </tr>
+                </thead>
+                <tbody id="export-cart-tbody">
+                  <!-- Dynamic export cart rows -->
+                </tbody>
+              </table>
+            </div>
+            
+            <button class="btn btn-light btn-sm" onclick="App.addExportCartRow()">
+              <i class="fa-solid fa-plus"></i> Thêm sản phẩm xuất
+            </button>
+          </div>
+          
+          <!-- Right: Metadata & Submit panel -->
+          <div class="receipt-summary">
+            <h3 style="font-weight:700; border-bottom:1px solid var(--border); padding-bottom:10px;">Thông tin phiếu</h3>
+            
+            <div class="form-group">
+              <label for="export-note">Ghi chú phiếu xuất</label>
+              <textarea id="export-note" rows="4" class="form-control" placeholder="Ví dụ: Xuất hủy hàng hết hạn, hoặc chuyển kho..."></textarea>
+            </div>
+            
+            <div class="receipt-summary-row" style="margin-top:10px;">
+              <span>Tổng số mặt hàng:</span>
+              <span id="export-total-items-qty">0</span>
+            </div>
+            
+            <div class="receipt-summary-total">
+              <span>Giá trị xuất kho:</span>
+              <span id="export-total-price">0₫</span>
+            </div>
+            
+            <button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="App.submitExport()">
+              <i class="fa-solid fa-arrow-up-from-bracket"></i> Xác nhận xuất kho
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. END OF SHIFT INVENTORY TAB (MOST IMPORTANT) -->
+      <section id="counts-section" class="content-section">
+        <div class="section-header">
+          <div class="section-title">
+            <h1>Kiểm Kho Bàn Giao Cuối Ca</h1>
+            <p>Nhân viên kiểm kê số lượng thực tế, đối chiếu chênh lệch và bàn giao ca.</p>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-light" onclick="App.printActiveCountSheet()"><i class="fa-solid fa-print"></i> In phiếu kiểm kho</button>
+            <button class="btn btn-secondary" onclick="App.openCountHistoryModal()"><i class="fa-solid fa-clock-rotate-left"></i> Lịch sử bàn giao</button>
+          </div>
+        </div>
+
+        <div class="card-panel">
+          <div class="filter-row">
+            <div class="filter-inputs">
+              <div class="search-wrapper" style="width:260px;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="count-search-input" placeholder="Lọc nhanh nguyên liệu cần kiểm..." oninput="App.filterCountProducts(this.value)">
+              </div>
+              <span style="font-size:13px; color:var(--text-muted);">Mẹo: Điền số lượng đếm được vào cột <strong>"Tồn thực tế"</strong>. Hệ thống tự động tính chênh lệch.</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Big Count Workspace -->
+        <div class="receipt-grid">
+          <div class="receipt-cart">
+            <h3 style="margin-bottom:16px; font-weight:700;"><i class="fa-solid fa-list-check"></i> Danh sách kiểm kê chi tiết</h3>
+            
+            <div class="table-responsive">
+              <table class="table-custom" id="active-count-table">
+                <thead>
+                  <tr>
+                    <th>Nguyên liệu / Sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th style="text-align:right;">Tồn đầu ca</th>
+                    <th style="text-align:right;">Nhập trong ca</th>
+                    <th style="text-align:right;">Xuất trong ca</th>
+                    <th style="text-align:right; font-weight:700; color:var(--primary);">Tồn lý thuyết</th>
+                    <th style="width:110px; text-align:center;">Tồn thực tế</th>
+                    <th>Đơn vị</th>
+                    <th style="text-align:right;">Chênh lệch</th>
+                    <th style="text-align:right;">Giá trị chênh lệch</th>
+                  </tr>
+                </thead>
+                <tbody id="count-products-tbody">
+                  <!-- Dynamic full list of products for end-of-shift count -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <!-- Summary Sidebar -->
+          <div class="receipt-summary">
+            <h3 style="font-weight:700; border-bottom:1px solid var(--border); padding-bottom:10px;">Hoàn tất kiểm kho</h3>
+            
+            <div class="form-group">
+              <label for="count-note">Ghi chú bàn giao ca</label>
+              <textarea id="count-note" rows="3" class="form-control" placeholder="Ví dụ: Ca tối bàn giao, thiếu 1 chai siro đào do pha chế đổ đổ..."></textarea>
+            </div>
+            
+            <div class="receipt-summary-row" style="margin-top:10px;">
+              <span>Tổng chênh lệch dư (Thừa):</span>
+              <span id="count-total-excess" style="color:var(--blue); font-weight:700;">0₫</span>
+            </div>
+            
+            <div class="receipt-summary-row">
+              <span>Tổng chênh lệch hụt (Thiếu):</span>
+              <span id="count-total-loss" style="color:var(--red); font-weight:700;">0₫</span>
+            </div>
+            
+            <div class="receipt-summary-total" style="border-top:1px dashed var(--border); padding-top:14px;">
+              <span>Số dư ròng:</span>
+              <span id="count-net-difference" style="font-weight:800;">0₫</span>
+            </div>
+            
+            <div style="font-size:12px; color:var(--text-muted); line-height:1.4;">
+              * Lưu ý: Khi nhấn "Xác nhận & Bàn giao", lượng tồn kho trong hệ thống sẽ tự động cập nhật về lượng <strong>Tồn thực tế</strong>.
+            </div>
+            
+            <button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="App.submitCount()">
+              <i class="fa-solid fa-clipboard-check"></i> Xác nhận & Bàn giao ca
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. REPORTS TAB -->
+      <section id="reports-section" class="content-section">
+        <div class="section-header">
+          <div class="section-title">
+            <h1>Báo Cáo Thống Kê Kho</h1>
+            <p>Xem báo cáo nhập xuất, báo cáo chi phí, tỷ lệ hao hụt và sản phẩm tồn kho.</p>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-light" onclick="App.exportReportToExcel()"><i class="fa-solid fa-file-excel"></i> Xuất Excel báo cáo</button>
+            <button class="btn btn-light" onclick="window.print()"><i class="fa-solid fa-print"></i> In / Xuất PDF</button>
+          </div>
+        </div>
+
+        <!-- Date and Type Filter -->
+        <div class="card-panel">
+          <div class="filter-row">
+            <div class="filter-inputs">
+              <select id="report-type" class="form-select" style="width:200px;" onchange="App.generateReport()">
+                <option value="inventory">Báo cáo tồn kho hiện tại</option>
+                <option value="imports">Báo cáo nhập kho</option>
+                <option value="exports">Báo cáo xuất kho / hao hụt</option>
+                <option value="counts">Báo cáo chênh lệch kiểm kho</option>
+                <option value="costs">Báo cáo tổng hợp chi phí</option>
+              </select>
+
+              <select id="report-range" class="form-select" style="width:160px;" onchange="App.handleReportRangeChange(this.value)">
+                <option value="today">Hôm nay</option>
+                <option value="yesterday">Hôm qua</option>
+                <option value="week">Tuần này</option>
+                <option value="month">Tháng này</option>
+                <option value="custom">Tùy chọn ngày...</option>
+              </select>
+
+              <div id="report-custom-dates" style="display:none; align-items:center; gap:8px;">
+                <input type="date" id="report-start-date" class="form-control" style="width:150px;" onchange="App.generateReport()">
+                <span>đến</span>
+                <input type="date" id="report-end-date" class="form-control" style="width:150px;" onchange="App.generateReport()">
+              </div>
+            </div>
+            
+            <div id="report-stat-summary" style="font-weight:700; color:var(--primary); font-size:15px;">
+              <!-- Dynamic overall status -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Report Charts area -->
+        <div class="chart-grid" id="report-charts-container">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title" id="report-chart-title">Nhập & Xuất</div>
+            </div>
+            <div class="chart-body">
+              <canvas id="reportChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">Cơ cấu mặt hàng nhập nhiều</div>
+            </div>
+            <div class="chart-body">
+              <canvas id="reportPieChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Report Table panel -->
+        <div class="card-panel print-visible">
+          <div id="print-report-header" style="display:none; text-align:center; margin-bottom:20px;">
+            <h2 id="print-store-name">Đá Xay & Trà Sữa Tươi Cát Tường</h2>
+            <p id="print-store-address">120 Lý Thường Kiệt, Q.10, TP.HCM</p>
+            <hr style="margin:10px 0;">
+            <h3 id="print-report-title" style="margin-top:10px; font-size:18px;">BÁO CÁO KHO HÀNG</h3>
+            <p id="print-report-date">Ngày báo cáo: ...</p>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table-custom" id="report-table">
+              <!-- Dynamically populated table structure -->
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. USER MANAGEMENT TAB -->
+      <section id="users-section" class="content-section">
+        <div class="section-header">
+          <div class="section-title">
+            <h1>Nhân Sự & Phân Quyền</h1>
+            <p>Quản lý tài khoản đăng nhập và cấu hình phân quyền truy cập hệ thống.</p>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-primary" onclick="App.openUserModal()"><i class="fa-solid fa-user-plus"></i> Thêm nhân sự</button>
+          </div>
+        </div>
+        
+        <!-- User list -->
+        <div class="table-responsive">
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Họ và Tên</th>
+                <th>Tên đăng nhập (@)</th>
+                <th>Số điện thoại</th>
+                <th>Email</th>
+                <th>Vai trò</th>
+                <th>Mức phân quyền</th>
+                <th>Trạng thái</th>
+                <th style="text-align:center;">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody">
+              <!-- Dynamic users -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Permissions guide display card -->
+        <div class="card-panel" style="margin-top:30px;">
+          <h3 style="margin-bottom:12px; font-weight:700;"><i class="fa-solid fa-shield-halved"></i> Bảng đối chiếu phân quyền chi tiết</h3>
+          <div class="table-responsive">
+            <table class="table-custom" style="font-size:13px;">
+              <thead>
+                <tr>
+                  <th>Vai trò</th>
+                  <th>Phân hệ Tổng Quan</th>
+                  <th>Sản phẩm & Cài đặt</th>
+                  <th>Phiếu Nhập/Xuất kho</th>
+                  <th>Kiểm Kho Bàn giao</th>
+                  <th>Báo Cáo tài chính</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Admin (Quản Trị Viên)</strong></td>
+                  <td><span class="badge badge-green">Có</span></td>
+                  <td><span class="badge badge-green">Có</span></td>
+                  <td><span class="badge badge-green">Có (Tất cả)</span></td>
+                  <td><span class="badge badge-green">Có (Bàn giao & Xem lịch sử)</span></td>
+                  <td><span class="badge badge-green">Có</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Manager (Quản lý cửa hàng)</strong></td>
+                  <td><span class="badge badge-green">Có</span></td>
+                  <td><span class="badge badge-orange">Xem & Xuất Excel</span></td>
+                  <td><span class="badge badge-green">Có</span></td>
+                  <td><span class="badge badge-green">Có (Xem lịch sử)</span></td>
+                  <td><span class="badge badge-green">Có</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Staff (Nhân viên kho)</strong></td>
+                  <td><span class="badge badge-red">Ẩn</span></td>
+                  <td><span class="badge badge-red">Ẩn</span></td>
+                  <td><span class="badge badge-green">Chỉ tạo phiếu</span></td>
+                  <td><span class="badge badge-green">Chỉ nhập đếm thực tế</span></td>
+                  <td><span class="badge badge-red">Ẩn hoàn toàn</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. SETTINGS TAB -->
+      <section id="settings-section" class="content-section">
+        <div class="section-header">
+          <div class="section-title">
+            <h1>Cài Đặt Hệ Thống</h1>
+            <p>Điều chỉnh thông tin cửa hàng, thuế, cảnh báo tồn tối thiểu và quản lý dữ liệu.</p>
+          </div>
+        </div>
+
+        <div class="receipt-grid" style="grid-template-columns: 1fr 1fr;">
+          <!-- Left: Store info & warning configs -->
+          <div class="receipt-cart">
+            <h3 style="margin-bottom:16px; font-weight:700;"><i class="fa-solid fa-shop"></i> Thông tin cửa hàng & Cấu hình</h3>
+            
+            <form id="settings-form" onsubmit="App.saveSettings(event)">
+              <div class="form-group">
+                <label for="settings-store-name">Tên cửa hàng *</label>
+                <input type="text" id="settings-store-name" class="form-control" required>
+              </div>
+
+              <div class="form-group">
+                <label for="settings-phone">Số điện thoại</label>
+                <input type="text" id="settings-phone" class="form-control">
+              </div>
+
+              <div class="form-group">
+                <label for="settings-address">Địa chỉ</label>
+                <input type="text" id="settings-address" class="form-control">
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="settings-tax">Thuế suất mặc định (%)</label>
+                  <input type="number" id="settings-tax" class="form-control" min="0" max="100">
+                </div>
+                <div class="form-group">
+                  <label for="settings-warning">Mức Cảnh Báo Kho Thấp (+ so với Tối thiểu)</label>
+                  <input type="number" id="settings-warning" class="form-control" min="0" title="Nếu hàng tồn hiện tại <= Tồn tối thiểu + Số này, hệ thống sẽ cảnh báo">
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Lưu thiết lập</button>
+            </form>
+          </div>
+
+          <!-- Right: Database actions (Backup, Restore, Logs) -->
+          <div class="receipt-summary" style="position:static; width:100%;">
+            <h3 style="font-weight:700; border-bottom:1px solid var(--border); padding-bottom:10px;"><i class="fa-solid fa-database"></i> Quản trị Dữ liệu</h3>
+            
+            <div style="font-size:13px; color:var(--text-muted); margin-bottom:10px; line-height:1.4;">
+              Bảo mật dữ liệu của bạn bằng cách tải file sao lưu về máy tính. Bạn có thể khôi phục lại bất kỳ lúc nào.
+            </div>
+
+            <button class="btn btn-secondary" style="width:100%; justify-content:flex-start;" onclick="App.downloadBackup()">
+              <i class="fa-solid fa-file-arrow-down"></i> Tải bản sao lưu (.json)
+            </button>
+
+            <button class="btn btn-light" style="width:100%; justify-content:flex-start; margin-top:8px;" onclick="App.triggerRestoreUpload()">
+              <i class="fa-solid fa-file-arrow-up"></i> Khôi phục dữ liệu từ tệp
+            </button>
+            <input type="file" id="restore-file-input" style="display:none;" accept=".json" onchange="App.handleRestoreUpload(event)">
+
+            <hr style="margin:16px 0; border:none; border-top:1px dashed var(--border);">
+
+            <button class="btn btn-danger" style="width:100%; justify-content:flex-start;" onclick="App.resetToDefaultState()">
+              <i class="fa-solid fa-arrows-rotate"></i> Thiết lập lại dữ liệu mẫu gốc
+            </button>
+            
+            <div style="font-size:11px; color:var(--red); font-weight:600; margin-top:4px;">
+              * Cảnh báo: Hành động này sẽ xóa sạch dữ liệu hiện tại và nạp lại dữ liệu gốc của quán!
+            </div>
+          </div>
+        </div>
+
+        <!-- Full Audit Log Panel -->
+        <div class="card-panel" style="margin-top:24px;">
+          <h3 style="margin-bottom:16px; font-weight:700;"><i class="fa-solid fa-history"></i> Toàn bộ Nhật ký Hoạt động Hệ thống</h3>
+          <div class="table-responsive" style="max-height:400px; overflow-y:auto;">
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th>Thời gian</th>
+                  <th>Nhân viên</th>
+                  <th>Hành động</th>
+                  <th>Chi tiết hoạt động</th>
+                </tr>
+              </thead>
+              <tbody id="settings-log-tbody">
+                <!-- All logs will print here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODAL WINDOWS -->
+  <!-- ========================================== -->
+
+  <!-- 1. PRODUCT MODAL (Add/Edit Product) -->
+  <div class="modal-overlay" id="product-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="product-modal-title">Thêm sản phẩm mới</h3>
+        <button class="modal-close" onclick="App.closeProductModal()">&times;</button>
+      </div>
+      <form id="product-form" onsubmit="App.saveProduct(event)">
+        <input type="hidden" id="prod-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="prod-name">Tên sản phẩm *</label>
+            <input type="text" id="prod-name" class="form-control" required placeholder="Ví dụ: Trà Đen Lộc Phát 1kg">
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-category">Danh mục *</label>
+              <select id="prod-category" class="form-select" required>
+                <!-- Dynamic categories -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="prod-supplier">Nhà cung cấp *</label>
+              <select id="prod-supplier" class="form-select" required>
+                <!-- Dynamic suppliers -->
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-unit">Đơn vị tính *</label>
+              <input type="text" id="prod-unit" class="form-control" required placeholder="Gói, Chai, Túi, Ly...">
+            </div>
+            <div class="form-group">
+              <label for="prod-barcode">Mã vạch / Barcode</label>
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="prod-barcode" class="form-control" placeholder="Mã vạch sản phẩm...">
+                <button type="button" class="btn btn-light" onclick="App.startBarcodeScanner('prod-barcode')" title="Quét bằng camera">
+                  <i class="fa-solid fa-camera"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-beginning">Tồn đầu kỳ *</label>
+              <input type="number" id="prod-beginning" class="form-control" min="0" required placeholder="0">
+            </div>
+            <div class="form-group">
+              <label for="prod-min">Tồn tối thiểu *</label>
+              <input type="number" id="prod-min" class="form-control" min="0" required placeholder="5">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-cost">Giá gốc nhập kho (₫) *</label>
+              <input type="number" id="prod-cost" class="form-control" min="0" required placeholder="120000">
+            </div>
+            <div class="form-group">
+              <label for="prod-selling">Giá bán (nếu có) (₫)</label>
+              <input type="number" id="prod-selling" class="form-control" min="0" placeholder="0">
+            </div>
+          </div>
+
+          <!-- Product Image Upload link simulation -->
+          <div class="form-group">
+            <label for="prod-image-url">Ảnh sản phẩm (URL hoặc tải ảnh mẫu)</label>
+            <div style="display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;">
+              <input type="text" id="prod-image-url" class="form-control" placeholder="Dán link ảnh hoặc để trống...">
+              <button type="button" class="btn btn-light btn-sm" onclick="App.generateMockProductImage()">Tạo ảnh ngẫu nhiên</button>
+            </div>
+            <div id="prod-image-preview-container" style="margin-top:10px; display:none; text-align:center;">
+              <img id="prod-image-preview" src="" style="max-height:100px; border-radius:var(--radius-sm); border:1px solid var(--border);">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="prod-note">Ghi chú</label>
+            <textarea id="prod-note" rows="2" class="form-control" placeholder="Ghi chú bảo quản hoặc chi tiết..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" onclick="App.closeProductModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu sản phẩm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. CATEGORY MANAGEMENT MODAL -->
+  <div class="modal-overlay" id="category-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Quản lý Danh Mục</h3>
+        <button class="modal-close" onclick="App.closeCategoryModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Add new category form inline -->
+        <form id="category-form" onsubmit="App.saveCategory(event)" style="display:flex; gap:10px; margin-bottom:20px;">
+          <input type="hidden" id="cat-id">
+          <input type="text" id="cat-name" class="form-control" required placeholder="Tên danh mục mới...">
+          <input type="text" id="cat-desc" class="form-control" placeholder="Mô tả ngắn...">
+          <button type="submit" class="btn btn-primary">Thêm</button>
+        </form>
+
+        <!-- Current categories table -->
+        <div class="table-responsive">
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Tên danh mục</th>
+                <th>Mô tả</th>
+                <th style="width:60px; text-align:center;">Xóa</th>
+              </tr>
+            </thead>
+            <tbody id="modal-category-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. SUPPLIER MANAGEMENT MODAL -->
+  <div class="modal-overlay" id="supplier-modal">
+    <div class="modal-content" style="max-width:700px;">
+      <div class="modal-header">
+        <h3>Quản lý Nhà Cung Cấp</h3>
+        <button class="modal-close" onclick="App.closeSupplierModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="supplier-form" onsubmit="App.saveSupplier(event)" style="margin-bottom:20px;">
+          <input type="hidden" id="sup-id">
+          <div class="form-row" style="margin-bottom:10px;">
+            <input type="text" id="sup-name" class="form-control" required placeholder="Tên nhà cung cấp *">
+            <input type="text" id="sup-phone" class="form-control" placeholder="Số điện thoại">
+          </div>
+          <div class="form-row" style="margin-bottom:10px;">
+            <input type="email" id="sup-email" class="form-control" placeholder="Email">
+            <input type="text" id="sup-address" class="form-control" placeholder="Địa chỉ">
+          </div>
+          <div style="display:flex; gap:10px;">
+            <input type="text" id="sup-note" class="form-control" placeholder="Ghi chú nhà cung cấp...">
+            <button type="submit" class="btn btn-primary" style="padding: 10px 24px;">Lưu</button>
+          </div>
+        </form>
+
+        <div class="table-responsive">
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Tên NCC</th>
+                <th>Liên hệ</th>
+                <th>Địa chỉ</th>
+                <th style="width:60px; text-align:center;">Xóa</th>
+              </tr>
+            </thead>
+            <tbody id="modal-supplier-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. USER FORM MODAL -->
+  <div class="modal-overlay" id="user-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="user-modal-title">Thêm tài khoản nhân viên</h3>
+        <button class="modal-close" onclick="App.closeUserModal()">&times;</button>
+      </div>
+      <form id="user-form" onsubmit="App.saveUser(event)">
+        <input type="hidden" id="usr-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="usr-fullname">Họ và Tên *</label>
+            <input type="text" id="usr-fullname" class="form-control" required placeholder="Nguyễn Văn A">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="usr-username">Tên tài khoản (đăng nhập) *</label>
+              <input type="text" id="usr-username" class="form-control" required placeholder="nhanvien_kho">
+            </div>
+            <div class="form-group">
+              <label for="usr-password">Mật khẩu đăng nhập *</label>
+              <input type="password" id="usr-password" class="form-control" required placeholder="Nhập mật khẩu">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="usr-role">Vai trò phân quyền *</label>
+              <select id="usr-role" class="form-select" required>
+                <option value="staff">Staff (Nhân viên kho - Chạy đơn, kiểm đếm)</option>
+                <option value="manager">Manager (Quản lý - Xem báo cáo, quản lý tồn)</option>
+                <option value="admin">Admin (Quản trị viên - Toàn quyền hệ thống)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="usr-phone">Số điện thoại</label>
+              <input type="text" id="usr-phone" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="usr-email">Email</label>
+              <input type="email" id="usr-email" class="form-control">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" onclick="App.closeUserModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu nhân sự</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. IMPORT HISTORY MODAL -->
+  <div class="modal-overlay" id="import-history-modal">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3>Lịch sử Nhập Kho</h3>
+        <button class="modal-close" onclick="App.closeImportHistoryModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Mã phiếu</th>
+                <th>Ngày nhập</th>
+                <th>Nhà cung cấp</th>
+                <th>Nhân viên thực hiện</th>
+                <th style="text-align:right;">Tổng tiền nhập</th>
+                <th>Ghi chú</th>
+                <th style="text-align:center;">Chi tiết</th>
+              </tr>
+            </thead>
+            <tbody id="import-history-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. EXPORT HISTORY MODAL -->
+  <div class="modal-overlay" id="export-history-modal">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3>Lịch sử Xuất Kho</h3>
+        <button class="modal-close" onclick="App.closeExportHistoryModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Mã phiếu</th>
+                <th>Ngày xuất</th>
+                <th>Nhân viên</th>
+                <th style="text-align:right;">Giá trị hàng xuất</th>
+                <th>Ghi chú</th>
+                <th style="text-align:center;">Chi tiết</th>
+              </tr>
+            </thead>
+            <tbody id="export-history-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. COUNT HISTORY MODAL -->
+  <div class="modal-overlay" id="count-history-modal">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3>Lịch sử Kiểm Kho & Bàn Giao Ca</h3>
+        <button class="modal-close" onclick="App.closeCountHistoryModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Mã phiếu</th>
+                <th>Ngày thực hiện</th>
+                <th>Nhân viên kiểm đếm</th>
+                <th style="text-align:right;">Chênh lệch ròng (VND)</th>
+                <th>Ghi chú</th>
+                <th style="text-align:center;">Chi tiết</th>
+              </tr>
+            </thead>
+            <tbody id="count-history-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. TRANSACTION DETAIL MODAL (Universal view for imports/exports/counts detail) -->
+  <div class="modal-overlay" id="detail-modal">
+    <div class="modal-content" style="max-width:750px;">
+      <div class="modal-header">
+        <h3 id="detail-modal-title">Chi tiết giao dịch</h3>
+        <button class="modal-close" onclick="App.closeDetailModal()">&times;</button>
+      </div>
+      <div class="modal-body print-visible" id="detail-modal-body">
+        <!-- Dynamically rendering invoice structure inside -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light" onclick="App.printReceipt()"><i class="fa-solid fa-print"></i> In phiếu này</button>
+        <button class="btn btn-primary" onclick="App.closeDetailModal()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. CAMERA BARCODE SCANNER MODAL -->
+  <div class="modal-overlay" id="scanner-modal">
+    <div class="modal-content" style="max-width:480px;">
+      <div class="modal-header">
+        <h3>Quét mã vạch sản phẩm</h3>
+        <button class="modal-close" onclick="App.stopBarcodeScanner()">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <div id="scanner-container">
+          <div id="reader"></div>
+        </div>
+        <p style="margin-top:12px; font-size:13px; color:var(--text-muted);">
+          Đưa mã vạch của sản phẩm vào khung camera để hệ thống tự động nhận diện.
+        </p>
+      </div>
+      <div class="modal-footer" style="justify-content:center;">
+        <button class="btn btn-secondary" onclick="App.stopBarcodeScanner()">Đóng camera</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- Core App Logic -->
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
