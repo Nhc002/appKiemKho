@@ -198,6 +198,42 @@
       "active": true,
       "recipe_missing": true,
       "id": 1783604736293
+    },
+    {
+      "item_id": "fabi-item-new-15",
+      "item_name": "Sữa Tươi Trân Châu Đường Đen",
+      "category": "Sữa tươi",
+      "price": 55000,
+      "active": true,
+      "recipe_missing": true,
+      "id": 1783605036948
+    },
+    {
+      "item_id": "fabi-item-new-15",
+      "item_name": "Sữa Tươi Trân Châu Đường Đen",
+      "category": "Sữa tươi",
+      "price": 55000,
+      "active": true,
+      "recipe_missing": true,
+      "id": 1783605036948
+    },
+    {
+      "item_id": "fabi-item-new-26",
+      "item_name": "Sữa Tươi Trân Châu Đường Đen",
+      "category": "Sữa tươi",
+      "price": 55000,
+      "active": true,
+      "recipe_missing": true,
+      "id": 1783605336571
+    },
+    {
+      "item_id": "fabi-item-new-26",
+      "item_name": "Sữa Tươi Trân Châu Đường Đen",
+      "category": "Sữa tươi",
+      "price": 55000,
+      "active": true,
+      "recipe_missing": true,
+      "id": 1783605336571
     }
   ],
   "recipes": [
@@ -320,6 +356,26 @@
       "total_revenue_gross": 3086000,
       "total_cogs": 1366455,
       "created_at": "2026-07-09T13:45:42.913Z"
+    },
+    {
+      "id": 1783605043351,
+      "sync_date": "2026-07-09T13:50:43.351Z",
+      "start_date": "2026-07-09",
+      "end_date": "2026-07-09",
+      "total_revenue_net": 1777000,
+      "total_revenue_gross": 1807000,
+      "total_cogs": 722175,
+      "created_at": "2026-07-09T13:50:43.351Z"
+    },
+    {
+      "id": 1783605343128,
+      "sync_date": "2026-07-09T13:55:43.128Z",
+      "start_date": "2026-07-09",
+      "end_date": "2026-07-09",
+      "total_revenue_net": 2549000,
+      "total_revenue_gross": 2591000,
+      "total_cogs": 1032045,
+      "created_at": "2026-07-09T13:55:43.128Z"
     }
   ],
   "sale_items": [
@@ -462,9 +518,97 @@
       "revenue_gross": 605000,
       "discount_amount": 0,
       "cogs": 0
+    },
+    {
+      "id": 1783605043351,
+      "sale_id": 1783605043351,
+      "product_id": 1,
+      "quantity_sold": 15,
+      "revenue_net": 645000,
+      "revenue_gross": 675000,
+      "discount_amount": 30000,
+      "cogs": 380925
+    },
+    {
+      "id": 1783605043352,
+      "sale_id": 1783605043351,
+      "product_id": 2,
+      "quantity_sold": 13,
+      "revenue_net": 637000,
+      "revenue_gross": 637000,
+      "discount_amount": 0,
+      "cogs": 341250
+    },
+    {
+      "id": 1783605043353,
+      "sale_id": 1783605043351,
+      "product_id": 1783605036948,
+      "quantity_sold": 9,
+      "revenue_net": 495000,
+      "revenue_gross": 495000,
+      "discount_amount": 0,
+      "cogs": 0
+    },
+    {
+      "id": 1783605343128,
+      "sale_id": 1783605343128,
+      "product_id": 1,
+      "quantity_sold": 21,
+      "revenue_net": 903000,
+      "revenue_gross": 945000,
+      "discount_amount": 42000,
+      "cogs": 533295
+    },
+    {
+      "id": 1783605343129,
+      "sale_id": 1783605343128,
+      "product_id": 2,
+      "quantity_sold": 19,
+      "revenue_net": 931000,
+      "revenue_gross": 931000,
+      "discount_amount": 0,
+      "cogs": 498750
+    },
+    {
+      "id": 1783605343130,
+      "sale_id": 1783605343128,
+      "product_id": 1783605336571,
+      "quantity_sold": 13,
+      "revenue_net": 715000,
+      "revenue_gross": 715000,
+      "discount_amount": 0,
+      "cogs": 0
     }
   ],
   "logs": [
+    {
+      "id": 1783605343163,
+      "timestamp": "2026-07-09T13:55:43.131Z",
+      "user_name": "Hệ thống",
+      "action": "Đồng bộ doanh số",
+      "details": "Đồng bộ thành công dữ liệu bán hàng iPOS (2026-07-09 -> 2026-07-09). Doanh thu Net: 2.549.000₫, Giá vốn COGS: 1.032.045₫. Trừ nguyên liệu kho thành công."
+    },
+    {
+      "id": 1783605336013,
+      "timestamp": "2026-07-09T13:55:35.968Z",
+      "user_name": "Hệ thống",
+      "action": "Đồng bộ Fabi",
+      "details": "Phát hiện món mới từ iPOS: Sữa Tươi Trân Châu Đường Đen (fabi-item-new-26). Đã tạo sản phẩm và đánh dấu 'Recipe Missing' để cấu hình định lượng sau."
+    },
+    {
+      "id": 1783605043358,
+      "timestamp": "2026-07-09T13:50:43.354Z",
+      "user_name": "Hệ thống",
+      "action": "Đồng bộ doanh số",
+      "details": "Đồng bộ thành công dữ liệu bán hàng iPOS (2026-07-09 -> 2026-07-09). Doanh thu Net: 1.777.000₫, Giá vốn COGS: 722.175₫. Trừ nguyên liệu kho thành công."
+    },
+    {
+      "id": 1783605036286,
+      "timestamp": "2026-07-09T13:50:36.284Z",
+      "user_name": "Hệ thống",
+      "action": "Đồng bộ Fabi",
+      "details": "Phát hiện món mới từ iPOS: Sữa Tươi Trân Châu Đường Đen (fabi-item-new-15). Đã tạo sản phẩm và đánh dấu 'Recipe Missing' để cấu hình định lượng sau."
+    },
     {
       "id": 1783604742921,
       "timestamp": "2026-07-09T13:45:42.916Z",
