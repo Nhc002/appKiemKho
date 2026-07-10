@@ -4,7 +4,7 @@ services:
           runtime: node
               region: singapore # Near Vietnam
                   plan: free
-                      buildCommand: cd backend && npm install --include=dev && npm run build
+                      buildCommand: cd backend && npm install --production=false && npm run build
                           startCommand: cd backend && npm start
                               envVars:
                                     - key: NODE_ENV
@@ -29,4 +29,3 @@ services:
                                                                                                                                                                           sync: false
                                                                                                                                                                               healthCheckPath: /health
                                                                                                                                                                                   autoDeploy: true # Auto deploy on push
-                                                                                                                                                                                  
