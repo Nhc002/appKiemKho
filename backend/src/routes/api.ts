@@ -37,17 +37,22 @@ router.get("/", (req, res) => {
 
 router.get('/dashboard', async (req: Request, res: Response) => {
   try {
-    const products = await ProductRepository.getAll();
-    const ingredients = await IngredientRepository.getAll();
-    const sales = await SaleRepository.getSales();
-    const counts = await InventoryRepository.getCounts();
-    const exportsList = await InventoryRepository.getExports();
+    // Chạy tất cả query song song để giảm thời gian phản hồi
+    const [products, ingredients, sales, counts, exportsList, recipes] = await Promise.all([
+      ProductRepository.getAll(),
+      IngredientRepository.getAll(),
+      SaleRepository.getSales(),
+      InventoryRepository.getCounts(),
+      InventoryRepository.getExports(),
+      RecipeRepository.getAll(),
+    ]);
 
     const todayStr = new Date().toISOString().substring(0, 10);
     
     // Today's statistics
     let todayRevenue = 0;
     let todayCogs = 0;
+
     
     sales.forEach(s => {
       // Check if sync date is today
@@ -107,7 +112,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
 
     // Top Ingredients Consumed (Calculate based on sales * recipes)
     const ingredientConsumedMap: Record<number, { name: string; quantity: number; unit: string; cost: number }> = {};
-    const recipes = await RecipeRepository.getAll();
+    // recipes já carregado acima via Promise.all
 
     sales.forEach(s => {
       s.items?.forEach(it => {
