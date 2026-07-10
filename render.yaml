@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: fabi-inventory-backend
+    runtime: node
+    region: singapore  # Gần Việt Nam nhất
+    plan: free
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5000"
+      - key: SUPABASE_URL
+        sync: false  # Cần nhập thủ công trên Render dashboard
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false  # URL frontend sau khi deploy (VD: https://your-app.vercel.app)
+      - key: FABI_BASE_URL
+        value: "https://posapi.ipos.vn"
+      - key: FABI_TOKEN
+        sync: false
+      - key: FABI_COMPANY_UID
+        sync: false
+      - key: FABI_BRAND_UID
+        sync: false
+      - key: FABI_STORE_UID
+        sync: false
+    healthCheckPath: /health
+    autoDeploy: true  # Tự động deploy khi push lên GitHub

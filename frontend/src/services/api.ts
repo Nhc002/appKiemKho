@@ -3,10 +3,13 @@ import { db } from '../db.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+console.log(`[API Client] Kết nối backend tại: ${API_BASE_URL}`);
+
 // Create custom axios instance
+// Timeout cao hơn cho cloud deployment (Render free tier có cold start ~30s)
 const client = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 4000
+  timeout: 15000
 });
 
 // Flag indicating if we are using the backend API or falling back to IndexedDB

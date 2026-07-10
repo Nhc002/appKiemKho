@@ -4,11 +4,14 @@
   "type": "module",
   "description": "Backend service for beverage shop inventory management integrated with Fabi iPOS and Supabase",
   "main": "dist/index.js",
- "scripts": {
-  "dev": "tsx watch src/index.ts",
-  "build": "tsc",
-  "start": "node dist/index.js"
-},
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.8",
     "axios": "^1.6.8",

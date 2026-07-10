@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build output
+backend/dist/
+frontend/dist/
+
+# Environment files (QUAN TRỌNG: không push secrets lên GitHub!)
+backend/.env
+frontend/.env.production
+frontend/.env.local
+
+# Local database file (dữ liệu đã trên Supabase cloud)
+database.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
