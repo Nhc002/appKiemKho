@@ -3,13 +3,7 @@ import { ApiService } from '../services/api.js';
 
 export const useStore = create((set) => ({
   theme: localStorage.getItem('kho_theme') || 'light',
-  currentUser: JSON.parse(localStorage.getItem('kho_current_user')) || {
-    id: 'usr-1',
-    username: 'admin',
-    fullname: 'Nguyễn Quản Trị',
-    role: 'admin',
-    active: true
-  },
+  currentUser: JSON.parse(localStorage.getItem('kho_current_user')) || null,
   
   // Store Settings
   storeName: 'Đá Xay & Trà Sữa Tươi Cát Tường',
@@ -33,8 +27,22 @@ export const useStore = create((set) => ({
   },
 
   setCurrentUser: (user) => {
+    if (user) {
+      localStorage.setItem('kho_current_user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('kho_current_user');
+    }
+    set({ currentUser: user });
+  },
+
+  login: (user) => {
     localStorage.setItem('kho_current_user', JSON.stringify(user));
     set({ currentUser: user });
+  },
+
+  logout: () => {
+    localStorage.removeItem('kho_current_user');
+    set({ currentUser: null });
   },
 
   setSettings: (settings) => {

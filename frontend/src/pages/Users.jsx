@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore.js';
 import { useForm } from 'react-hook-form';
 import { 
@@ -8,22 +8,33 @@ import {
   UserCheck, 
   Phone, 
   Mail,
-  ShieldAlert 
+  ShieldAlert,
+  Key,
+  Trash2
 } from 'lucide-react';
 
+const DEFAULT_USERS = [
+  { id: 'usr-1', username: 'admin', fullname: 'Nguyễn Quản Trị', role: 'admin', password: 'admin123', phone: '0988888888', email: 'admin@beverage.com', active: true },
+  { id: 'usr-2', username: 'manager', fullname: 'Trần Cửa Hàng Trưởng', role: 'manager', password: 'manager123', phone: '0977777777', email: 'manager@beverage.com', active: true },
+  { id: 'usr-3', username: 'staff', fullname: 'Lê Nhân Viên Kho', role: 'staff', password: 'staff123', phone: '0966666666', email: 'staff@beverage.com', active: true }
+];
+
 export default function UsersPage() {
-  const { currentUser, setCurrentUser } = useStore();
+  const { currentUser } = useStore();
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
-  // Mock users list matching DB default seed
-  const [users, setUsers] = React.useState([
-    { id: 'usr-1', username: 'admin', fullname: 'Nguyễn Quản Trị', role: 'admin', phone: '0988888888', email: 'admin@beverage.com', active: true },
-    { id: 'usr-2', username: 'manager', fullname: 'Trần Cửa Hàng Trưởng', role: 'manager', phone: '0977777777', email: 'manager@beverage.com', active: true },
-    { id: 'usr-3', username: 'staff', fullname: 'Lê Nhân Viên Kho', role: 'staff', phone: '0966666666', email: 'staff@beverage.com', active: true }
-  ]);
+  // Load from localStorage or use default
+  const [users, setUsers] = useState(() => {
+    const saved = localStorage.getItem('kho_users');
+    return saved ? JSON.parse(saved) : DEFAULT_USERS;
+  });
+
+  // Sync to localStorage
+  useEffect(() => {
+    localStorage.setItem('kho_users', JSON.stringify(users));
+  }, [users]);
 
   const handleCreateUser = (data) => {
-    // Check duplication
     if (users.some(u => u.username.toLowerCase() === data.username.toLowerCase())) {
       alert('Tên tài khoản này đã tồn tại!');
       return;
@@ -34,6 +45,7 @@ export default function UsersPage() {
       username: data.username.toLowerCase(),
       fullname: data.fullname,
       role: data.role,
+      password: data.password || '123456',
       phone: data.phone || '-',
       email: data.email || '-',
       active: true
@@ -44,9 +56,15 @@ export default function UsersPage() {
     alert('Thêm tài khoản nhân sự mới thành công!');
   };
 
-  const handleToggleSession = (user) => {
-    setCurrentUser(user);
-    alert(`Đã chuyển phiên làm việc sang: ${user.fullname} (${user.role.toUpperCase()})`);
+  const handleDeleteUser = (id, e) => {
+    e.stopPropagation();
+    if (id === currentUser?.id) {
+      alert('Không thể xóa tài khoản hiện đang đăng nhập!');
+      return;
+    }
+    if (window.confirm('Bạn có chắc chắn muốn xóa nhân viên này khỏi hệ thống?')) {
+      setUsers(users.filter(u => u.id !== id));
+    }
   };
 
   return (
@@ -55,7 +73,7 @@ export default function UsersPage() {
       {/* HEADER */}
       <div>
         <h1 className="text-2xl font-extrabold tracking-tight">Nhân Sự & Phân Quyền</h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Cấu hình tài khoản nhân sự và phân chia quyền truy cập hệ thống iPOS.</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Cấu hình tài khoản nhân sự, mật khẩu và phân chia quyền truy cập hệ thống iPOS.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -91,13 +109,24 @@ export default function UsersPage() {
             </div>
 
             <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-500">Mật khẩu đăng nhập *</label>
+              <input 
+                type="text" 
+                placeholder="Nhập mật khẩu"
+                {...register('password', { required: true, minLength: 4 })}
+                className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-xl text-xs focus:outline-none focus:border-emerald-500 focus:bg-white transition-all font-semibold"
+              />
+              {errors.password && <span className="text-[10px] text-rose-500 font-bold">Vui lòng nhập mật khẩu (tối thiểu 4 ký tự).</span>}
+            </div>
+
+            <div className="space-y-1">
               <label className="text-xs font-bold text-slate-500">Vai trò / Phân quyền *</label>
               <select 
                 {...register('role', { required: true })}
                 className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-xl text-sm focus:outline-none focus:border-emerald-500 transition-all font-semibold"
               >
                 <option value="staff">Staff (Nhân viên ca - Nhập/Xuất/Kiểm kho)</option>
-                <option value="manager">Manager (Quản lý - Kho & Báo cáo)</option>
+                <option value="manager">Manager (Trưởng ca - Kho & Báo cáo)</option>
                 <option value="admin">Admin (Quản trị viên - Toàn quyền)</option>
               </select>
             </div>
@@ -144,7 +173,7 @@ export default function UsersPage() {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {users.map(u => {
-                const isSelected = u.id === currentUser.id;
+                const isSelected = u.id === currentUser?.id;
                 let roleColor = 'bg-blue-50 text-blue-600 dark:bg-blue-950/20 dark:text-blue-400';
                 if (u.role === 'admin') roleColor = 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400';
                 if (u.role === 'manager') roleColor = 'bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400';
@@ -152,10 +181,9 @@ export default function UsersPage() {
                 return (
                   <div 
                     key={u.id}
-                    onClick={() => handleToggleSession(u)}
-                    className={`p-4 border rounded-2xl text-left cursor-pointer transition-all flex justify-between items-start ${isSelected ? 'border-emerald-500 bg-emerald-50/10 dark:bg-emerald-950/5 ring-2 ring-emerald-500/20' : 'border-slate-200 dark:border-slate-800 hover:border-slate-400 bg-white dark:bg-slate-900'}`}
+                    className={`p-4 border rounded-2xl text-left transition-all flex justify-between items-start bg-white dark:bg-slate-900 ${isSelected ? 'border-emerald-500 bg-emerald-50/10 dark:bg-emerald-950/5 ring-2 ring-emerald-500/20' : 'border-slate-200 dark:border-slate-800'}`}
                   >
-                    <div className="space-y-2.5">
+                    <div className="space-y-2.5 flex-1 pr-2">
                       <div>
                         <h4 className="font-bold text-sm text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
                           {u.fullname}
@@ -167,12 +195,26 @@ export default function UsersPage() {
                       <div className="space-y-1 text-[11px] text-slate-400">
                         <p className="flex items-center gap-1"><Phone size={10} /> {u.phone}</p>
                         <p className="flex items-center gap-1"><Mail size={10} /> {u.email}</p>
+                        <p className="flex items-center gap-1 text-slate-500 dark:text-slate-300 font-mono">
+                          <Key size={10} className="text-emerald-500" /> MK: <span className="font-bold bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">{u.password}</span>
+                        </p>
                       </div>
                     </div>
 
-                    <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase ${roleColor}`}>
-                      {u.role}
-                    </span>
+                    <div className="flex flex-col items-end justify-between h-full space-y-4">
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase ${roleColor}`}>
+                        {u.role === 'manager' ? 'Trưởng Ca' : u.role === 'staff' ? 'Nhân Viên' : 'Admin'}
+                      </span>
+                      {u.id !== 'usr-1' && u.id !== currentUser?.id && (
+                        <button 
+                          onClick={(e) => handleDeleteUser(u.id, e)}
+                          className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                          title="Xóa nhân sự"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -207,7 +249,7 @@ export default function UsersPage() {
                     <td className="px-4 py-3 text-emerald-600">✔ Có</td>
                   </tr>
                   <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                    <td className="px-4 py-3 text-left font-bold text-slate-800 dark:text-slate-100">Manager</td>
+                    <td className="px-4 py-3 text-left font-bold text-slate-800 dark:text-slate-100">Trưởng Ca</td>
                     <td className="px-4 py-3 text-emerald-600">✔ Có</td>
                     <td className="px-4 py-3 text-emerald-600">✔ Có</td>
                     <td className="px-4 py-3 text-emerald-600">✔ Có</td>
@@ -215,7 +257,7 @@ export default function UsersPage() {
                     <td className="px-4 py-3 text-emerald-600">✔ Có</td>
                   </tr>
                   <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                    <td className="px-4 py-3 text-left font-bold text-slate-800 dark:text-slate-100">Staff</td>
+                    <td className="px-4 py-3 text-left font-bold text-slate-800 dark:text-slate-100">Nhân Viên</td>
                     <td className="px-4 py-3 text-rose-600">✖ Ẩn</td>
                     <td className="px-4 py-3 text-rose-600">✖ Ẩn</td>
                     <td className="px-4 py-3 text-emerald-600">✔ Chỉ phiếu</td>
@@ -228,7 +270,7 @@ export default function UsersPage() {
 
             <div className="p-3.5 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-950/30 rounded-xl flex gap-2.5 text-xs text-blue-700 dark:text-blue-400 leading-normal">
               <ShieldAlert size={16} className="shrink-0 mt-0.5" />
-              <p className="font-semibold">Mẹo kiểm thử: Bạn chỉ cần click chọn tài khoản nhân viên bất kỳ ở trên để chuyển đổi phiên làm việc và kiểm tra phân quyền ẩn/hiện giao diện tương ứng lập tức.</p>
+              <p className="font-semibold">Lưu ý: Để chuyển đổi phiên làm việc giữa các tài khoản, vui lòng bấm nút "Đăng xuất" ở góc trên cùng bên phải và đăng nhập lại bằng thông tin tài khoản tương ứng.</p>
             </div>
           </div>
 

@@ -20,7 +20,8 @@ import {
   Menu, 
   ChevronDown, 
   Wifi, 
-  WifiOff 
+  WifiOff,
+  LogOut
 } from 'lucide-react';
 
 // Pages imports (we will create them next)
@@ -33,6 +34,7 @@ import Counts from './pages/Counts.jsx';
 import Reports from './pages/Reports.jsx';
 import UsersPage from './pages/Users.jsx';
 import Settings from './pages/Settings.jsx';
+import Login from './pages/Login.jsx';
 
 export default function App() {
   const navigate = useNavigate();
@@ -46,6 +48,7 @@ export default function App() {
     setTheme, 
     currentUser, 
     setCurrentUser, 
+    logout,
     storeName, 
     isOffline, 
     setOffline 
@@ -90,6 +93,7 @@ export default function App() {
 
   // Route security gate: Redirect if user role has no permission to view active path
   useEffect(() => {
+    if (!currentUser) return;
     const activeItem = navigationItems.find(item => item.path === location.pathname);
     if (activeItem && !activeItem.roles.includes(currentUser.role)) {
       // Direct staff to count page, others to dashboard
@@ -102,6 +106,7 @@ export default function App() {
   }, [currentUser, location.pathname]);
 
   const getBottomNavItems = () => {
+    if (!currentUser) return [];
     if (currentUser.role === 'staff') {
       return [
         { name: 'Nhập kho', path: '/imports', icon: Download },
@@ -119,6 +124,10 @@ export default function App() {
   };
 
   const activeAlerts = dashData?.low_stock_alerts || [];
+
+  if (!currentUser) {
+    return <Login />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex transition-colors duration-200">
@@ -258,7 +267,9 @@ export default function App() {
                 </div>
                 <div className="hidden sm:flex flex-col text-xs pr-1">
                   <span className="font-bold text-slate-800 dark:text-slate-200">{currentUser.fullname}</span>
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wide">{currentUser.role}</span>
+                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wide">
+                    {currentUser.role === 'manager' ? 'Trưởng Ca' : currentUser.role === 'staff' ? 'Nhân Viên' : 'Admin'}
+                  </span>
                 </div>
                 <ChevronDown size={12} className="text-slate-400" />
               </button>
@@ -267,33 +278,21 @@ export default function App() {
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setRoleMenuOpen(false)} />
                   <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 overflow-hidden animate-fade-in">
-                    <div className="p-3 bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 text-[10px] font-extrabold text-slate-400 tracking-wider">THAY ĐỔI VAI TRÒ (TEST)</div>
+                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                      <p className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate">{currentUser.fullname}</p>
+                      <p className="text-[10px] text-slate-400 font-extrabold uppercase mt-0.5 tracking-wider">
+                        {currentUser.role === 'manager' ? 'Trưởng Ca' : currentUser.role === 'staff' ? 'Nhân Viên' : 'Admin'}
+                      </p>
+                    </div>
                     <button 
                       onClick={() => {
-                        setCurrentUser({ id: 'usr-1', username: 'admin', fullname: 'Nguyễn Quản Trị', role: 'admin', active: true });
+                        logout();
                         setRoleMenuOpen(false);
                       }}
-                      className="w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold"
+                      className="w-full text-left px-4 py-3 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-2 transition-colors"
                     >
-                      Admin (Quản trị viên)
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setCurrentUser({ id: 'usr-2', username: 'manager', fullname: 'Trần Cửa Hàng Trưởng', role: 'manager', active: true });
-                        setRoleMenuOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold"
-                    >
-                      Manager (Quản lý kho)
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setCurrentUser({ id: 'usr-3', username: 'staff', fullname: 'Lê Nhân Viên Kho', role: 'staff', active: true });
-                        setRoleMenuOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold"
-                    >
-                      Staff (Nhân viên ca)
+                      <LogOut size={14} />
+                      <span>Đăng xuất</span>
                     </button>
                   </div>
                 </>
