@@ -16,7 +16,7 @@ import {
   Layers,
   Archive,
   AlertTriangle,
-  Heart
+  X
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -25,21 +25,24 @@ export default function Products() {
   const location = useLocation();
   const queryClient = useQueryClient();
   
-  // Navigation tabs: 'products' (Fabi) | 'ingredients' (Ingredients)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [activeSubTab, setActiveSubTab] = useState('products');
-  
-  // Filters state
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState('');
   const [syncing, setSyncing] = useState(false);
 
-  // Modals state
   const [ingModalOpen, setIngModalOpen] = useState(false);
   const [editingIng, setEditingIng] = useState(null);
 
-  // React Hook Form for Ingredient
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm();
+
+  // Resize listener
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Read search query from URL params (e.g. from global search)
   useEffect(() => {
@@ -114,7 +117,6 @@ export default function Products() {
     syncMutation.mutate();
   };
 
-  // Excel exports
   const handleExportProductsExcel = () => {
     const data = products.map(p => ({
       'Mã Sản Phẩm (iPOS ID)': p.item_id,
@@ -123,10 +125,9 @@ export default function Products() {
       'Giá Bán (VND)': p.price,
       'Định lượng BOM': p.recipe_missing ? 'Chưa cấu hình' : 'Đã cấu hình'
     }));
-
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
-    Xcontent_to_sheet: XLSX.utils.book_append_sheet(workbook, worksheet, 'Sản phẩm Fabi');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sản phẩm Fabi');
     XLSX.writeFile(workbook, `Fabi_Products_${Date.now()}.xlsx`);
   };
 
@@ -139,14 +140,12 @@ export default function Products() {
       'Tồn Tối Thiểu': i.min_stock,
       'Nhà Cung Cấp': suppliers.find(s => s.id === i.supplier_id)?.name || 'Lẻ'
     }));
-
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Nguyên vật liệu');
     XLSX.writeFile(workbook, `Nguyen_Vat_Lieu_${Date.now()}.xlsx`);
   };
 
-  // Ingredient form controls
   const handleOpenIngModal = (ing = null) => {
     reset();
     if (ing) {
@@ -185,7 +184,7 @@ export default function Products() {
 
   const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
 
-  // Filtering logic
+  // Filtering products
   const filteredProducts = products.filter(p => {
     const matchSearch = p.item_name.toLowerCase().includes(search.toLowerCase()) || p.item_id.toLowerCase().includes(search.toLowerCase());
     const matchCategory = !category || p.category === category;
@@ -195,7 +194,7 @@ export default function Products() {
     return matchSearch && matchCategory && matchStatus;
   });
 
-  // Deduplicate ingredients logic
+  // Deduplicate ingredients (for clean mobile display & desk tables)
   const seenIngNames = new Set();
   const uniqueIngredients = [];
   ingredients.forEach(i => {
@@ -209,221 +208,194 @@ export default function Products() {
     i.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  return (
-    <div className="space-y-4 animate-slide-up pb-10">
-      
-      {/* HEADER ROW */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-xl font-extrabold tracking-tight">Danh mục hàng hóa</h1>
-          <p className="text-xs text-slate-500">Quản lý món Fabi và nguyên vật liệu</p>
-        </div>
-      </div>
-
-      {/* SEGMENTED CONTROL (Tabs) */}
-      <div className="bg-slate-100 dark:bg-slate-900 p-1 rounded-2xl flex w-full">
-        <button
-          onClick={() => { setActiveSubTab('products'); setSearch(''); }}
-          className={`flex-1 py-2 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all ${
-            activeSubTab === 'products'
-              ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
-              : 'text-slate-500 hover:text-slate-700'
-          }`}
-        >
-          <Layers size={14} />
-          <span>Sản phẩm Fabi</span>
-        </button>
-        <button
-          onClick={() => { setActiveSubTab('ingredients'); setSearch(''); }}
-          className={`flex-1 py-2 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all ${
-            activeSubTab === 'ingredients'
-              ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
-              : 'text-slate-500 hover:text-slate-700'
-          }`}
-        >
-          <Archive size={14} />
-          <span>Nguyên vật liệu</span>
-        </button>
-      </div>
-
-      {/* FILTER CONTROLS */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 shadow-sm space-y-3">
-        
-        {/* Collapsible search bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-          <input 
-            type="text" 
-            placeholder={activeSubTab === 'products' ? 'Tìm theo tên món hoặc mã...' : 'Tìm tên nguyên liệu...'}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:bg-white font-semibold transition-all"
-          />
-        </div>
-
-        {activeSubTab === 'products' && (
-          <div className="grid grid-cols-2 gap-2">
-            <select 
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 rounded-xl text-xs focus:outline-none focus:border-blue-500 font-semibold"
-            >
-              <option value="">Tất cả nhóm</option>
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-
-            <select 
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 rounded-xl text-xs focus:outline-none focus:border-blue-500 font-semibold"
-            >
-              <option value="">Trạng thái định lượng</option>
-              <option value="missing">Chưa định lượng</option>
-              <option value="configured">Đã định lượng</option>
-            </select>
+  // --- MOBILE LAYOUT ---
+  if (isMobile) {
+    return (
+      <div className="space-y-4 animate-slide-up pb-10">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-xl font-extrabold tracking-tight">Danh mục hàng hóa</h1>
+            <p className="text-xs text-slate-500">Quản lý món Fabi và nguyên vật liệu</p>
           </div>
-        )}
-
-        {/* Sync & Export actions */}
-        <div className="flex gap-2">
-          {activeSubTab === 'products' ? (
-            <>
-              <button 
-                onClick={handleManualSync}
-                disabled={syncing}
-                className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-md shadow-blue-500/15 disabled:opacity-50 transition-colors"
-              >
-                <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
-                <span>Đồng bộ iPOS</span>
-              </button>
-              <button 
-                onClick={handleExportProductsExcel}
-                className="px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 transition-colors"
-              >
-                <FileDown size={14} />
-              </button>
-            </>
-          ) : (
-            <>
-              <button 
-                onClick={() => handleOpenIngModal()}
-                className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-md shadow-blue-500/15 transition-colors"
-              >
-                <Plus size={13} />
-                <span>Thêm nguyên liệu</span>
-              </button>
-              <button 
-                onClick={handleExportIngredientsExcel}
-                className="px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 transition-colors"
-              >
-                <FileDown size={14} />
-              </button>
-            </>
-          )}
         </div>
 
-      </div>
+        {/* SEGMENTED CONTROL */}
+        <div className="bg-slate-100 dark:bg-slate-900 p-1 rounded-2xl flex w-full">
+          <button
+            onClick={() => { setActiveSubTab('products'); setSearch(''); }}
+            className={`flex-1 py-2 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all ${
+              activeSubTab === 'products'
+                ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <Layers size={14} />
+            <span>Sản phẩm Fabi</span>
+          </button>
+          <button
+            onClick={() => { setActiveSubTab('ingredients'); setSearch(''); }}
+            className={`flex-1 py-2 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all ${
+              activeSubTab === 'ingredients'
+                ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <Archive size={14} />
+            <span>Nguyên vật liệu</span>
+          </button>
+        </div>
 
-      {/* CARD LIST GRID */}
-      <div className="space-y-2.5">
-        
-        {/* Products Card List */}
-        {activeSubTab === 'products' && (
-          <>
-            {prodLoading ? (
-              <p className="text-center text-slate-400 py-6 text-xs">Đang nạp món iPOS...</p>
-            ) : filteredProducts.map(p => (
-              <div key={p.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 shadow-sm flex flex-col justify-between gap-3 active:scale-98 transition-transform">
+        {/* FILTER CONTROLS */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 shadow-sm space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+            <input 
+              type="text" 
+              placeholder={activeSubTab === 'products' ? 'Tìm theo tên món hoặc mã...' : 'Tìm tên nguyên liệu...'}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:bg-white font-semibold transition-all"
+            />
+          </div>
+
+          {activeSubTab === 'products' && (
+            <div className="grid grid-cols-2 gap-2">
+              <select 
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 rounded-xl text-xs focus:outline-none focus:border-blue-500 font-semibold"
+              >
+                <option value="">Tất cả nhóm</option>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+              <select 
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 rounded-xl text-xs focus:outline-none focus:border-blue-500 font-semibold"
+              >
+                <option value="">Trạng thái định lượng</option>
+                <option value="missing">Chưa định lượng</option>
+                <option value="configured">Đã định lượng</option>
+              </select>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="flex gap-2">
+            {activeSubTab === 'products' ? (
+              <>
+                <button 
+                  onClick={handleManualSync}
+                  disabled={syncing}
+                  className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-md shadow-blue-500/15 disabled:opacity-50 transition-colors h-[42px]"
+                >
+                  <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
+                  <span>Đồng bộ iPOS</span>
+                </button>
+                <button 
+                  onClick={handleExportProductsExcel}
+                  className="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-bold flex items-center justify-center gap-1 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors h-[42px]"
+                >
+                  <FileDown size={14} />
+                  <span>Xuất</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button 
+                  onClick={() => handleOpenIngModal()}
+                  className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-md shadow-blue-500/15 transition-colors h-[42px]"
+                >
+                  <Plus size={13} />
+                  <span>Thêm nguyên liệu</span>
+                </button>
+                <button 
+                  onClick={handleExportIngredientsExcel}
+                  className="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-bold flex items-center justify-center gap-1 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors h-[42px]"
+                >
+                  <FileDown size={14} />
+                  <span>Xuất</span>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* LIST CARDS */}
+        <div className="space-y-3">
+          {activeSubTab === 'products' ? (
+            filteredProducts.map(p => (
+              <div key={p.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 shadow-sm space-y-2">
                 <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-extrabold text-sm text-slate-850 dark:text-slate-100 leading-tight">🥤 {p.item_name}</h3>
-                    <span className="text-[10px] text-slate-400 mt-1 block">Mã iPOS: <span className="font-mono">{p.item_id}</span></span>
-                  </div>
-                  <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 rounded-lg text-[9px] font-black uppercase">
-                    {p.category || 'Món khác'}
+                  <span className="font-bold text-sm text-slate-850 dark:text-slate-100 leading-tight">{p.item_name}</span>
+                  <span className="px-2.5 py-0.5 bg-blue-50 dark:bg-blue-955/30 text-blue-600 dark:text-blue-400 rounded-lg text-[9px] font-black uppercase tracking-wider">
+                    {p.category || 'Khác'}
                   </span>
                 </div>
-
-                <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-3">
-                  <span className="text-xs font-black text-slate-700 dark:text-slate-300">{(p.price || 0).toLocaleString('vi-VN')}₫</span>
-                  <div className="flex items-center gap-2">
-                    {p.recipe_missing ? (
-                      <span className="inline-flex items-center gap-0.5 px-2 py-0.5 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-lg text-[9px] font-extrabold">
-                        <AlertCircle size={10} /> Thiếu định lượng
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-0.5 px-2 py-0.5 bg-green-50 dark:bg-green-950/20 text-green-600 dark:text-green-400 rounded-lg text-[9px] font-extrabold">
-                        <CheckCircle size={10} /> Đủ định lượng
-                      </span>
-                    )}
-                    <button 
-                      onClick={() => navigate('/recipes', { state: { selectProductId: p.id } })}
-                      className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-750 text-white rounded-xl text-[10px] font-bold flex items-center gap-0.5 transition-all"
-                    >
-                      <span>Định lượng</span>
-                      <ArrowRight size={10} />
-                    </button>
-                  </div>
+                <div className="flex justify-between text-xs text-slate-400">
+                  <span>Mã iPOS: <span className="font-mono">{p.item_id}</span></span>
+                  <span className="font-black text-slate-800 dark:text-slate-200">{(p.price || 0).toLocaleString('vi-VN')}₫</span>
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-800/50">
+                  {p.recipe_missing ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-red-50 dark:bg-red-955/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold">
+                      <AlertTriangle size={10} /> Chưa định lượng
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-955/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-bold">
+                      <CheckCircle size={10} /> Đã định lượng
+                    </span>
+                  )}
+                  <button 
+                    onClick={() => navigate('/recipes', { state: { selectProductId: p.id } })}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-350 hover:bg-blue-600 hover:text-white transition-colors"
+                  >
+                    <span>Công thức</span>
+                    <ArrowRight size={10} />
+                  </button>
                 </div>
               </div>
-            ))}
-            {filteredProducts.length === 0 && !prodLoading && (
-              <p className="text-center text-slate-400 py-8 text-xs">Không tìm thấy sản phẩm nào.</p>
-            )}
-          </>
-        )}
-
-        {/* Ingredients Card List */}
-        {activeSubTab === 'ingredients' && (
-          <>
-            {ingLoading ? (
-              <p className="text-center text-slate-400 py-6 text-xs">Đang tải nguyên liệu...</p>
-            ) : filteredIngredients.map(ing => {
+            ))
+          ) : (
+            filteredIngredients.map(ing => {
               const isLow = ing.current_stock <= ing.min_stock;
-              const isOut = ing.current_stock <= 0;
-              let badgeColor = "bg-green-50 text-green-600 dark:bg-green-950/20 dark:text-green-400";
-              let badgeText = "Đủ hàng";
-              if (isOut) {
-                badgeColor = "bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400";
-                badgeText = "Hết hàng";
-              } else if (isLow) {
-                badgeColor = "bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400";
-                badgeText = "Sắp hết";
-              }
-
+              const isOut = ing.current_stock === 0;
               return (
-                <div key={ing.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 shadow-sm flex flex-col gap-3 active:scale-98 transition-transform">
+                <div key={ing.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 shadow-sm space-y-2">
                   <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-extrabold text-sm text-slate-800 dark:text-slate-100 leading-none">📦 {ing.name}</h3>
-                      <span className="text-[10px] text-slate-400 mt-1 block">DVT: <span className="font-bold text-slate-600">{ing.unit}</span></span>
+                    <span className="font-bold text-sm text-slate-850 dark:text-slate-100 leading-tight">{ing.name}</span>
+                    <span className="text-xs text-slate-400 font-medium">Đơn vị: {ing.unit}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5 text-xs text-slate-400">
+                    <span>Đơn giá: <span className="font-bold text-slate-700 dark:text-slate-300">{(ing.cost_price || 0).toLocaleString('vi-VN')}₫</span></span>
+                    <span>Nhà CC: <span className="font-bold text-slate-700 dark:text-slate-300 truncate max-w-[100px] inline-block align-bottom">{suppliers.find(s => s.id === ing.supplier_id)?.name || 'Lẻ'}</span></span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-800/50">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-slate-400">Tồn:</span>
+                      <span className={`font-black text-xs ${isLow ? 'text-red-600' : 'text-slate-800 dark:text-slate-100'}`}>
+                        {ing.current_stock} {ing.unit}
+                      </span>
+                      {isOut ? (
+                        <span className="text-[9px] font-black bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Hết</span>
+                      ) : isLow ? (
+                        <span className="text-[9px] font-black bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Sắp hết</span>
+                      ) : (
+                        <span className="text-[9px] font-black bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Đủ</span>
+                      )}
                     </div>
-                    <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase ${badgeColor}`}>
-                      {badgeText}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800 pt-2.5">
-                    <p>Giá vốn: <span className="font-bold text-slate-800 dark:text-slate-200">{(ing.cost_price || 0).toLocaleString('vi-VN')}₫</span></p>
-                    <p>Nhà CC: <span className="font-bold text-slate-700 dark:text-slate-350">{suppliers.find(s => s.id === ing.supplier_id)?.name || 'Lẻ'}</span></p>
-                  </div>
-
-                  <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-800 pt-2.5 mt-0.5">
-                    <span className="text-xs font-bold text-slate-500">
-                      Tồn kho: <span className={`font-black text-sm ${isLow ? 'text-red-600' : 'text-slate-800 dark:text-slate-100'}`}>{ing.current_stock}</span> / Định mức: {ing.min_stock}
-                    </span>
                     <div className="flex gap-2">
                       <button 
                         onClick={() => handleOpenIngModal(ing)}
-                        className="p-2 bg-slate-100 hover:bg-blue-600 hover:text-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-xl transition-all active:scale-95"
+                        className="p-2 bg-slate-100 hover:bg-blue-650 hover:text-white dark:bg-slate-800 rounded-lg text-slate-650 transition-colors"
                       >
                         <Edit size={12} />
                       </button>
                       <button 
                         onClick={() => handleDeleteIngredient(ing.id)}
-                        className="p-2 bg-rose-50 hover:bg-rose-600 hover:text-white dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded-xl transition-all active:scale-95"
+                        className="p-2 bg-rose-50 hover:bg-rose-600 hover:text-white dark:bg-rose-955/20 text-rose-600 rounded-lg transition-colors"
                       >
                         <Trash2 size={12} />
                       </button>
@@ -431,103 +403,443 @@ export default function Products() {
                   </div>
                 </div>
               );
-            })}
-            {filteredIngredients.length === 0 && !ingLoading && (
-              <p className="text-center text-slate-400 py-8 text-xs">Không tìm thấy nguyên liệu nào.</p>
+            })
+          )}
+        </div>
+
+        {/* MOBILE DRAWER MODAL */}
+        {ingModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 rounded-t-3xl shadow-xl w-full max-w-lg overflow-hidden animate-slide-up flex flex-col max-h-[85vh]">
+              <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full mx-auto my-3" onClick={() => setIngModalOpen(false)} />
+              
+              <div className="px-4 pb-3 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                <h3 className="font-extrabold text-sm text-slate-850 dark:text-slate-100">
+                  {editingIng ? `Sửa: ${editingIng.name}` : 'Thêm nguyên liệu mới'}
+                </h3>
+              </div>
+
+              <form onSubmit={handleSubmit(handleSaveIngredient)} className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500">Tên nguyên liệu *</label>
+                  <input 
+                    type="text" 
+                    placeholder="Ví dụ: Trà đen Lộc Phát 1kg"
+                    {...register('name', { required: true })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-750 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-500 h-[44px]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500">Đơn vị *</label>
+                    <input 
+                      type="text" 
+                      placeholder="Gói, Chai, Hộp..."
+                      {...register('unit', { required: true })}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-750 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-500 h-[44px]"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500">Giá nhập (₫) *</label>
+                    <input 
+                      type="number" 
+                      placeholder="120000"
+                      {...register('cost_price', { required: true, min: 0 })}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-750 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-500 h-[44px]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500">Tồn ban đầu *</label>
+                    <input 
+                      type="number" 
+                      placeholder="0"
+                      {...register('current_stock', { required: true, min: 0 })}
+                      disabled={!!editingIng}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-750 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-500 h-[44px] disabled:opacity-50"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500">Tồn tối thiểu *</label>
+                    <input 
+                      type="number" 
+                      placeholder="5"
+                      {...register('min_stock', { required: true, min: 0 })}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-750 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-500 h-[44px]"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500">Nhà cung cấp</label>
+                  <select 
+                    {...register('supplier_id')}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-750 rounded-xl text-xs font-bold focus:outline-none focus:border-blue-500 h-[44px]"
+                  >
+                    <option value="">Chọn nhà cung cấp</option>
+                    {suppliers.map(s => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <button 
+                    type="button" 
+                    onClick={() => setIngModalOpen(false)}
+                    className="flex-1 py-3 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 font-bold rounded-xl text-xs h-[44px]"
+                  >
+                    Hủy
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs h-[44px] shadow-md shadow-blue-500/15"
+                  >
+                    Lưu
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // --- DESKTOP LAYOUT ---
+  return (
+    <div className="space-y-6 animate-fade-in">
+      
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight">Danh Mục Hàng Hóa</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Quản lý món ăn kinh doanh đồng bộ từ Fabi iPOS và nguyên vật liệu lưu kho.</p>
+        </div>
+        
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          {activeSubTab === 'products' ? (
+            <>
+              <button 
+                onClick={handleExportProductsExcel} 
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold transition-colors bg-white dark:bg-slate-900"
+              >
+                <FileDown size={16} /> Xuất Excel
+              </button>
+              <button 
+                onClick={handleManualSync}
+                disabled={syncing}
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-600/25 transition-all disabled:opacity-50"
+              >
+                <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} /> 
+                {syncing ? 'Đang đồng bộ...' : 'Đồng bộ iPOS'}
+              </button>
+            </>
+          ) : (
+            <>
+              <button 
+                onClick={handleExportIngredientsExcel} 
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold transition-colors bg-white dark:bg-slate-900"
+              >
+                <FileDown size={16} /> Xuất Excel
+              </button>
+              <button 
+                onClick={() => handleOpenIngModal()}
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-600/25 transition-all"
+              >
+                <Plus size={16} /> Thêm nguyên liệu
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* TABS SWITCHER */}
+      <div className="flex border-b border-slate-200 dark:border-slate-800">
+        <button
+          onClick={() => { setActiveSubTab('products'); setSearch(''); }}
+          className={`px-5 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-1.5 ${activeSubTab === 'products' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+        >
+          <Layers size={16} /> Món ăn bán ra (iPOS)
+        </button>
+        <button
+          onClick={() => { setActiveSubTab('ingredients'); setSearch(''); }}
+          className={`px-5 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-1.5 ${activeSubTab === 'ingredients' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+        >
+          <Archive size={16} /> Nguyên vật liệu kho
+        </button>
+      </div>
+
+      {/* FILTER CONTROL CARD */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+          <div className="flex flex-1 flex-wrap gap-3 w-full">
+            
+            {/* Search */}
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input 
+                type="text" 
+                placeholder={activeSubTab === 'products' ? 'Tìm theo tên món hoặc mã iPOS...' : 'Tìm tên nguyên liệu...'}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-900 transition-all"
+              />
+            </div>
+
+            {/* Product-only filters */}
+            {activeSubTab === 'products' && (
+              <>
+                <select 
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-xl text-sm focus:outline-none focus:border-emerald-500 transition-all font-semibold"
+                >
+                  <option value="">Tất cả danh mục</option>
+                  {categories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+
+                <select 
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-xl text-sm focus:outline-none focus:border-emerald-500 transition-all font-semibold"
+                >
+                  <option value="">Trạng thái định lượng</option>
+                  <option value="missing">Thiếu định lượng (BOM)</option>
+                  <option value="configured">Đã định lượng (BOM)</option>
+                </select>
+              </>
             )}
-          </>
+
+          </div>
+          
+          <div className="text-xs font-bold text-slate-400">
+            {activeSubTab === 'products' ? (
+              <span>Hiển thị: {filteredProducts.length} / {products.length} món</span>
+            ) : (
+              <span>Hiển thị: {filteredIngredients.length} / {ingredients.length} nguyên liệu</span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* DATA TABLE AREA */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+        
+        {/* TAB 1: FABI PRODUCTS TABLE */}
+        {activeSubTab === 'products' && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-xs">
+                  <th className="px-6 py-4">Món ăn / Đồ uống</th>
+                  <th className="px-6 py-4">Mã iPOS (item_id)</th>
+                  <th className="px-6 py-4">Danh mục</th>
+                  <th className="px-6 py-4 text-right">Giá bán iPOS</th>
+                  <th className="px-6 py-4 text-center">Định lượng (BOM)</th>
+                  <th className="px-6 py-4 text-center">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-semibold">
+                {prodLoading ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-slate-400">Đang nạp danh sách sản phẩm...</td>
+                  </tr>
+                ) : filteredProducts.map(p => (
+                  <tr key={p.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                    <td className="px-6 py-4 font-bold text-slate-850 dark:text-slate-100">{p.item_name}</td>
+                    <td className="px-6 py-4 text-slate-400 font-mono text-xs">{p.item_id}</td>
+                    <td className="px-6 py-4">
+                      <span className="px-2.5 py-1 bg-blue-50 dark:bg-blue-955/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs">
+                        {p.category || 'Món khác'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right text-slate-700 dark:text-slate-350">{(p.price || 0).toLocaleString('vi-VN')}₫</td>
+                    <td className="px-6 py-4 text-center">
+                      {p.recipe_missing ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 dark:bg-rose-955/20 text-rose-600 dark:text-rose-400 rounded-lg text-xs">
+                          <AlertCircle size={12} /> Thiếu BOM
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-955/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-xs">
+                          <CheckCircle size={12} /> Đã có BOM
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <button 
+                        onClick={() => navigate('/recipes', { state: { selectProductId: p.id } })}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-emerald-600 hover:text-white dark:bg-slate-800 rounded-lg text-xs transition-all"
+                      >
+                        <span>Định lượng</span> <ArrowRight size={12} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {filteredProducts.length === 0 && !prodLoading && (
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-slate-400">Không tìm thấy sản phẩm nào khớp với bộ lọc.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* TAB 2: INGREDIENTS TABLE */}
+        {activeSubTab === 'ingredients' && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-xs">
+                  <th className="px-6 py-4">Tên nguyên liệu</th>
+                  <th className="px-6 py-4">Đơn vị tính</th>
+                  <th className="px-6 py-4 text-right">Đơn giá vốn</th>
+                  <th className="px-6 py-4 text-right">Tồn kho hiện tại</th>
+                  <th className="px-6 py-4 text-right">Tồn tối thiểu</th>
+                  <th className="px-6 py-4">Nhà cung cấp</th>
+                  <th className="px-6 py-4 text-center">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-semibold">
+                {ingLoading ? (
+                  <tr>
+                    <td colSpan={7} className="py-8 text-center text-slate-400">Đang nạp danh sách nguyên vật liệu...</td>
+                  </tr>
+                ) : filteredIngredients.map(ing => {
+                  const isLow = ing.current_stock <= ing.min_stock;
+                  return (
+                    <tr key={ing.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                      <td className="px-6 py-4 font-bold text-slate-800 dark:text-slate-100">{ing.name}</td>
+                      <td className="px-6 py-4 text-slate-400">{ing.unit}</td>
+                      <td className="px-6 py-4 text-right text-slate-700 dark:text-slate-350">{(ing.cost_price || 0).toLocaleString('vi-VN')}₫</td>
+                      <td className={`px-6 py-4 text-right font-extrabold ${isLow ? 'text-rose-600' : 'text-slate-800 dark:text-slate-100'}`}>
+                        {ing.current_stock}
+                        {isLow && <span className="text-[9px] font-extrabold bg-rose-100 text-rose-700 dark:bg-rose-955/20 px-1.5 py-0.5 ml-1.5 rounded-full uppercase">HẾT HÀNG</span>}
+                      </td>
+                      <td className="px-6 py-4 text-right text-slate-400">{ing.min_stock}</td>
+                      <td className="px-6 py-4">{suppliers.find(s => s.id === ing.supplier_id)?.name || 'Lẻ'}</td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex justify-center gap-2">
+                          <button 
+                            onClick={() => handleOpenIngModal(ing)}
+                            className="p-1.5 bg-slate-100 hover:bg-blue-600 hover:text-white dark:bg-slate-800 rounded-lg text-slate-650 transition-colors"
+                          >
+                            <Edit size={13} />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteIngredient(ing.id)}
+                            className="p-1.5 bg-rose-50 hover:bg-rose-600 hover:text-white dark:bg-rose-955/20 text-rose-600 rounded-lg transition-colors"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {filteredIngredients.length === 0 && !ingLoading && (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-slate-400">Không tìm thấy nguyên vật liệu nào khớp.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
 
       </div>
 
-      {/* MODAL: ADD / EDIT INGREDIENT (Swipeable bottom drawer style on mobile) */}
+      {/* DESKTOP MODAL: ADD / EDIT INGREDIENT */}
       {ingModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/40 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 rounded-t-3xl sm:rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-slide-up max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-scale-up">
             
-            {/* Drawer swipe indicator on mobile */}
-            <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full mx-auto my-3 sm:hidden" onClick={() => setIngModalOpen(false)} />
-
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
-              <h3 className="font-extrabold text-sm text-slate-850 dark:text-slate-100">
-                {editingIng ? `Sửa: ${editingIng.name}` : 'Thêm nguyên liệu kho mới'}
+            <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+              <h3 className="font-extrabold text-base text-slate-850 dark:text-slate-100">
+                {editingIng ? `Sửa nguyên liệu: ${editingIng.name}` : 'Thêm nguyên liệu kho mới'}
               </h3>
               <button 
                 onClick={() => setIngModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold hidden sm:block"
+                className="text-slate-400 hover:text-slate-600 text-xl font-bold"
               >
                 &times;
               </button>
             </div>
 
-            <form onSubmit={handleSubmit(handleSaveIngredient)} className="flex-1 overflow-y-auto pb-6">
-              <div className="p-5 space-y-4">
+            <form onSubmit={handleSubmit(handleSaveIngredient)}>
+              <div className="p-6 space-y-4">
                 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Tên nguyên liệu *</label>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500">Tên nguyên liệu *</label>
                   <input 
                     type="text" 
                     placeholder="Ví dụ: Trà Đen Lộc Phát (Gói 1kg)"
                     {...register('name', { required: true })}
-                    className="w-full px-3.5 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:bg-white font-semibold transition-all h-[48px]"
+                    className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-xl text-xs focus:outline-none focus:border-emerald-500 focus:bg-white transition-all font-semibold"
                   />
                   {errors.name && <span className="text-[10px] text-rose-500 font-bold">Vui lòng điền tên nguyên liệu.</span>}
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">ĐVT *</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500">Đơn vị tính *</label>
                     <input 
                       type="text" 
-                      placeholder="Gói, Chai, Hộp..."
+                      placeholder="Gói, Chai, Hộp, Túi..."
                       {...register('unit', { required: true })}
-                      className="w-full px-3.5 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:bg-white font-semibold transition-all h-[48px]"
+                      className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-xl text-xs focus:outline-none focus:border-emerald-500 focus:bg-white transition-all font-semibold"
                     />
-                    {errors.unit && <span className="text-[10px] text-rose-500 font-bold">Thiếu đơn vị.</span>}
+                    {errors.unit && <span className="text-[10px] text-rose-500 font-bold">Đơn vị không hợp lệ.</span>}
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Giá nhập (₫) *</label>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500">Đơn giá gốc nhập kho (₫) *</label>
                     <input 
                       type="number" 
                       placeholder="120000"
                       {...register('cost_price', { required: true, min: 0 })}
-                      className="w-full px-3.5 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:bg-white font-semibold transition-all h-[48px]"
+                      className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-xl text-xs focus:outline-none focus:border-emerald-500 focus:bg-white transition-all font-semibold"
                     />
-                    {errors.cost_price && <span className="text-[10px] text-rose-500 font-bold">Giá không hợp lệ.</span>}
+                    {errors.cost_price && <span className="text-[10px] text-rose-500 font-bold">Vui lòng điền giá gốc.</span>}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Tồn ban đầu *</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500">Tồn kho ban đầu *</label>
                     <input 
                       type="number" 
                       placeholder="0"
                       {...register('current_stock', { required: true, min: 0 })}
-                      className="w-full px-3.5 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:bg-white font-semibold transition-all h-[48px]"
+                      className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-xl text-xs focus:outline-none focus:border-emerald-500 focus:bg-white transition-all font-semibold"
                       disabled={!!editingIng}
                     />
-                    {errors.current_stock && <span className="text-[10px] text-rose-500 font-bold">Số lượng sai.</span>}
+                    {errors.current_stock && <span className="text-[10px] text-rose-500 font-bold">Tồn kho không hợp lệ.</span>}
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Định mức tối thiểu *</label>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500">Tồn tối thiểu (Cảnh báo) *</label>
                     <input 
                       type="number" 
                       placeholder="5"
                       {...register('min_stock', { required: true, min: 0 })}
-                      className="w-full px-3.5 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:bg-white font-semibold transition-all h-[48px]"
+                      className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-xl text-xs focus:outline-none focus:border-emerald-500 focus:bg-white transition-all font-semibold"
                     />
-                    {errors.min_stock && <span className="text-[10px] text-rose-500 font-bold">Không hợp lệ.</span>}
+                    {errors.min_stock && <span className="text-[10px] text-rose-500 font-bold">Tối thiểu không hợp lệ.</span>}
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Nhà cung cấp</label>
+                  <label className="text-xs font-bold text-slate-500">Nhà cung cấp</label>
                   <select 
                     {...register('supplier_id')}
-                    className="w-full px-3.5 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-blue-500 font-semibold h-[48px]"
+                    className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-xl text-xs focus:outline-none focus:border-emerald-500 transition-all font-semibold"
                   >
                     <option value="">Chọn nhà cung cấp</option>
                     {suppliers.map(s => (
@@ -538,20 +850,21 @@ export default function Products() {
 
               </div>
 
-              <div className="px-5 pt-2 flex gap-3">
+              <div className="p-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
                 <button 
                   type="button" 
                   onClick={() => setIngModalOpen(false)}
-                  className="flex-1 py-3 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900 active:scale-95 transition-transform"
+                  className="px-4 py-2 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-350 bg-white dark:bg-slate-900"
                 >
                   Hủy
                 </button>
+                
                 <button 
                   type="submit"
                   disabled={ingMutation.isPending}
-                  className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-transform"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/25 flex items-center gap-1"
                 >
-                  Lưu lại
+                  Lưu nguyên liệu
                 </button>
               </div>
             </form>
